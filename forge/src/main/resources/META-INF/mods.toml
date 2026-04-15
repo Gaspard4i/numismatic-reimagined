@@ -1,0 +1,32 @@
+modLoader = "javafml"
+loaderVersion = "[47,)"
+license = "MIT"
+
+[[mods]]
+modId = "numismatic-reimagined"
+version = "${version}"
+displayName = "Numismatic Reimagined"
+description = '''A comprehensive currency and economy mod for Minecraft'''
+authors = "Gaspard4i"
+logoFile = "assets/numismatic-reimagined/icon.png"
+
+[[dependencies.numismatic-reimagined]]
+modId = "forge"
+mandatory = true
+versionRange = "[47,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.numismatic-reimagined]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[1.20.1,1.21)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.numismatic-reimagined]]
+modId = "architectury"
+mandatory = true
+versionRange = "[9,)"
+ordering = "AFTER"
+side = "BOTH"

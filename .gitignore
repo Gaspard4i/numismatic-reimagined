@@ -1,0 +1,39 @@
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.settings/
+.classpath
+.project
+*.launch
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Minecraft
+run/
+runs/
+logs/
+
+# Compiled
+out/
+bin/
+*.class
+
+# Local config
+local.properties
+
+# Architectury
+.architectury-transformer/
+
+# Claude
+.claude/
+CLAUDE.md

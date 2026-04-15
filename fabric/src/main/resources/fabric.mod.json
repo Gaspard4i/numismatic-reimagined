@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "numismatic-reimagined",
+  "version": "${version}",
+  "name": "Numismatic Reimagined",
+  "description": "A comprehensive currency and economy mod for Minecraft",
+  "authors": [
+    "Gaspard4i"
+  ],
+  "contact": {
+    "sources": "https://github.com/Gaspard4i/numismatic-reimagined"
+  },
+  "license": "MIT",
+  "icon": "assets/numismatic-reimagined/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "dev.gaspard4i.numismatic.fabric.NumismaticReimaginedFabric"
+    ],
+    "client": [
+      "dev.gaspard4i.numismatic.fabric.NumismaticReimaginedFabricClient"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.15.0",
+    "fabric-api": "*",
+    "minecraft": "~1.20.1",
+    "java": ">=17",
+    "architectury": ">=9.0.0"
+  }
+}

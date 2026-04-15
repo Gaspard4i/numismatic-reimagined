@@ -1,0 +1,15 @@
+{
+  "itemGroup.numismatic-reimagined": "Numismatic Reimagined",
+
+  "item.numismatic-reimagined.bronze_coin": "Bronze Coin",
+  "item.numismatic-reimagined.silver_coin": "Silver Coin",
+  "item.numismatic-reimagined.gold_coin": "Gold Coin",
+  "item.numismatic-reimagined.netherite_coin": "Netherite Coin",
+  "item.numismatic-reimagined.star_coin": "Star Coin",
+  "item.numismatic-reimagined.money_bag": "Money Bag",
+
+  "tooltip.numismatic-reimagined.coin_value": "Value: %s",
+  "tooltip.numismatic-reimagined.money_bag_value": "Contains: %s",
+  "tooltip.numismatic-reimagined.star_coin": "A legendary trophy coin",
+  "tooltip.numismatic-reimagined.star_coin.desc": "Awarded for accumulating 1000 Netherite Coins"
+}
