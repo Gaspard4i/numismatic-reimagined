@@ -13,14 +13,14 @@ public class NumismaticReimaginedFabricClient implements ClientModInitializer {
         ResourceLocation coinsId = new ResourceLocation(NumismaticConstants.MOD_ID, "coins");
 
         ItemProperties.register(NumismaticItems.BRONZE_COIN.get(), coinsId,
-                (stack, level, entity, seed) -> stack.getCount() / 99.0f);
+                (stack, level, entity, seed) -> stack.getCount() / 64.0f);
         ItemProperties.register(NumismaticItems.SILVER_COIN.get(), coinsId,
-                (stack, level, entity, seed) -> stack.getCount() / 99.0f);
+                (stack, level, entity, seed) -> stack.getCount() / 64.0f);
         ItemProperties.register(NumismaticItems.GOLD_COIN.get(), coinsId,
-                (stack, level, entity, seed) -> stack.getCount() / 99.0f);
+                (stack, level, entity, seed) -> stack.getCount() / 64.0f);
         ItemProperties.register(NumismaticItems.NETHERITE_COIN.get(), coinsId,
-                (stack, level, entity, seed) -> stack.getCount() / 99.0f);
+                (stack, level, entity, seed) -> stack.getCount() / 64.0f);
         ItemProperties.register(NumismaticItems.STAR_COIN.get(), coinsId,
-                (stack, level, entity, seed) -> stack.getCount() / 99.0f);
+                (stack, level, entity, seed) -> stack.getCount() / 64.0f);
     }
 }
