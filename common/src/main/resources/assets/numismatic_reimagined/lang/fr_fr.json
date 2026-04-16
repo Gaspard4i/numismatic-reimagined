@@ -6,10 +6,23 @@
   "item.numismatic_reimagined.gold_coin": "Pièce d'or",
   "item.numismatic_reimagined.netherite_coin": "Pièce de netherite",
   "item.numismatic_reimagined.star_coin": "Star Coin",
-  "item.numismatic_reimagined.money_bag": "Bourse",
+  "item.numismatic_reimagined.money_bag": "Petit sac",
+  "item.numismatic_reimagined.money_bag.silver": "Bourse",
+  "item.numismatic_reimagined.money_bag.gold": "Bourse lourde",
+  "item.numismatic_reimagined.money_bag.netherite": "Coffre royal",
 
   "tooltip.numismatic_reimagined.coin_value": "Valeur : %s",
   "tooltip.numismatic_reimagined.money_bag_value": "Contient : %s",
   "tooltip.numismatic_reimagined.star_coin": "Une pièce trophée légendaire",
-  "tooltip.numismatic_reimagined.star_coin.desc": "Obtenue en accumulant 1000 Pièces de netherite"
+  "tooltip.numismatic_reimagined.star_coin.desc": "Obtenue en accumulant 1000 Pièces de netherite",
+
+  "command.numismatic_reimagined.balance.self": "Votre solde : %s",
+  "command.numismatic_reimagined.balance.other": "Solde de %s : %s",
+  "command.numismatic_reimagined.deposit": "%s déposé(s) dans votre bourse",
+  "command.numismatic_reimagined.deposit.none": "Aucune pièce à déposer",
+  "command.numismatic_reimagined.withdraw": "%s retiré(s) de votre bourse",
+  "command.numismatic_reimagined.withdraw.insufficient": "Fonds insuffisants",
+  "command.numismatic_reimagined.set": "Solde de %s défini à %s",
+  "command.numismatic_reimagined.give": "%s donné(s) à %s",
+  "command.numismatic_reimagined.give_bag": "Bourse donnée d'une valeur de %s"
 }

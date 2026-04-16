@@ -3,9 +3,9 @@
 ## Phase 1 : Squelette + Items de monnaie
 - [x] Implémenté
 - [x] Tests unitaires (83 tests, 0 failures — CurrencyTest:19, CurrencyResolverTest:28, CurrencyConverterTest:36)
-- [ ] Testé manuellement par l'utilisateur
-- [ ] Issues résolues
-- Notes : Build OK (common+fabric+forge). Gradle Architectury 1.6, MC 1.20.1, Java 21. Textures placeholder à remplacer.
+- [x] Testé manuellement par l'utilisateur
+- [x] Issues résolues
+- Notes : Build OK (common+fabric). Module Forge supprimé. Textures finales en place (MIT + recoloration netherite/star). Stack max 99 avec texture variants (5 seuils). JEI intégré. Fonctions mcfunction de test. Creative tab dédié. RAM réduite à 4G. MoneyBag non implémenté (reporté, complexité). En pause — prêt pour Phase 2.
 
 ## Phase 2 : Stockage de monnaie / Système Purse
 - [ ] Implémenté

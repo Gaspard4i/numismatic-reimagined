@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "numismatic_reimagined:item/money_bag_1"
+
+  }
+}

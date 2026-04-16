@@ -6,10 +6,23 @@
   "item.numismatic_reimagined.gold_coin": "Gold Coin",
   "item.numismatic_reimagined.netherite_coin": "Netherite Coin",
   "item.numismatic_reimagined.star_coin": "Star Coin",
-  "item.numismatic_reimagined.money_bag": "Money Bag",
+  "item.numismatic_reimagined.money_bag": "Small Pouch",
+  "item.numismatic_reimagined.money_bag.silver": "Money Bag",
+  "item.numismatic_reimagined.money_bag.gold": "Heavy Purse",
+  "item.numismatic_reimagined.money_bag.netherite": "Royal Coffer",
 
   "tooltip.numismatic_reimagined.coin_value": "Value: %s",
   "tooltip.numismatic_reimagined.money_bag_value": "Contains: %s",
   "tooltip.numismatic_reimagined.star_coin": "A legendary trophy coin",
-  "tooltip.numismatic_reimagined.star_coin.desc": "Awarded for accumulating 1000 Netherite Coins"
+  "tooltip.numismatic_reimagined.star_coin.desc": "Awarded for accumulating 1000 Netherite Coins",
+
+  "command.numismatic_reimagined.balance.self": "Your balance: %s",
+  "command.numismatic_reimagined.balance.other": "%s's balance: %s",
+  "command.numismatic_reimagined.deposit": "Deposited %s into your purse",
+  "command.numismatic_reimagined.deposit.none": "No coins to deposit",
+  "command.numismatic_reimagined.withdraw": "Withdrew %s from your purse",
+  "command.numismatic_reimagined.withdraw.insufficient": "Insufficient funds",
+  "command.numismatic_reimagined.set": "Set %s's balance to %s",
+  "command.numismatic_reimagined.give": "Gave %s to %s",
+  "command.numismatic_reimagined.give_bag": "Gave a money bag worth %s"
 }

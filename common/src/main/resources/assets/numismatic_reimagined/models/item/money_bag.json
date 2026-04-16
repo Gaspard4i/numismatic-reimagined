@@ -1,6 +1,11 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "numismatic_reimagined:item/money_bag"
-  }
+    "layer0": "numismatic_reimagined:item/money_bag_0"
+  },
+  "overrides": [
+    { "predicate": { "numismatic_reimagined:bag_tier": 1.0 }, "model": "numismatic_reimagined:item/money_bag_silver" },
+    { "predicate": { "numismatic_reimagined:bag_tier": 2.0 }, "model": "numismatic_reimagined:item/money_bag_gold" },
+    { "predicate": { "numismatic_reimagined:bag_tier": 3.0 }, "model": "numismatic_reimagined:item/money_bag_netherite" }
+  ]
 }
