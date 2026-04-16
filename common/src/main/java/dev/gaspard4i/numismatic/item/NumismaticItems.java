@@ -57,7 +57,7 @@ public final class NumismaticItems {
 
     private static RegistrySupplier<Item> registerCoin(Currency currency) {
         RegistrySupplier<Item> supplier = ITEMS.register(currency.getItemId(),
-                () -> new CoinItem(currency, new Item.Properties())
+                () -> new CoinItem(currency, new Item.Properties().stacksTo(99))
         );
         COIN_ITEMS.put(currency, supplier);
         return supplier;

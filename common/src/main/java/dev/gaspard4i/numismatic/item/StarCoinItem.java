@@ -20,7 +20,7 @@ import java.util.List;
 public class StarCoinItem extends Item {
 
     public StarCoinItem() {
-        super(new Properties().rarity(Rarity.EPIC));
+        super(new Properties().stacksTo(99).rarity(Rarity.EPIC));
     }
 
     @Override
