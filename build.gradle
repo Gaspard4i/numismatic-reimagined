@@ -16,7 +16,7 @@ subprojects {
         silentMojangMappingsLicense()
 
         runConfigs.configureEach {
-            vmArgs "-Xmx8G", "-Xms2G"
+            vmArgs "-Xmx4G", "-Xms1G"
         }
     }
 

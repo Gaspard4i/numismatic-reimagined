@@ -37,3 +37,7 @@ local.properties
 # Claude
 .claude/
 CLAUDE.md
+
+# Markdown (sauf README)
+*.md
+!README.md

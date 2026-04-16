@@ -16,8 +16,10 @@ public class CoinItem extends Item {
 
     private final Currency currency;
 
+    public static final int MAX_STACK_SIZE = 99;
+
     public CoinItem(Currency currency, Properties properties) {
-        super(properties);
+        super(properties.stacksTo(MAX_STACK_SIZE));
         this.currency = currency;
     }
 

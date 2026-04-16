@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "numismatic-reimagined:item/silver_coin_1"
+  }
+}
