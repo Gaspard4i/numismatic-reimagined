@@ -42,7 +42,7 @@ public final class NumismaticItems {
     // Creative tab
     public static final RegistrySupplier<CreativeModeTab> NUMISMATIC_TAB = TABS.register("numismatic_tab",
             () -> CreativeTabRegistry.create(builder -> builder
-                    .title(Component.translatable("itemGroup.numismatic-reimagined"))
+                    .title(Component.translatable("itemGroup.numismatic_reimagined"))
                     .icon(() -> new ItemStack(GOLD_COIN.get()))
                     .displayItems((params, output) -> {
                         output.accept(new ItemStack(BRONZE_COIN.get()));

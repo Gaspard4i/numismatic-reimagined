@@ -1,6 +1,0 @@
-{
-  "parent": "minecraft:item/generated",
-  "textures": {
-    "layer0": "numismatic-reimagined:item/gold_coin_0"
-  }
-}

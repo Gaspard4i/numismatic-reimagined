@@ -90,7 +90,7 @@ public class MoneyBagItem extends Item {
         if (value > 0) {
             String formatted = CurrencyResolver.formatValue(value);
             tooltipComponents.add(
-                    Component.translatable("tooltip.numismatic-reimagined.money_bag_value", formatted)
+                    Component.translatable("tooltip.numismatic_reimagined.money_bag_value", formatted)
                             .withStyle(ChatFormatting.GOLD)
             );
         }

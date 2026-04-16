@@ -20,7 +20,7 @@ import java.util.List;
 public class StarCoinItem extends Item {
 
     public StarCoinItem() {
-        super(new Properties().stacksTo(1).rarity(Rarity.EPIC));
+        super(new Properties().rarity(Rarity.EPIC));
     }
 
     @Override
@@ -31,11 +31,11 @@ public class StarCoinItem extends Item {
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag isAdvanced) {
         tooltipComponents.add(
-                Component.translatable("tooltip.numismatic-reimagined.star_coin")
+                Component.translatable("tooltip.numismatic_reimagined.star_coin")
                         .withStyle(ChatFormatting.LIGHT_PURPLE)
         );
         tooltipComponents.add(
-                Component.translatable("tooltip.numismatic-reimagined.star_coin.desc")
+                Component.translatable("tooltip.numismatic_reimagined.star_coin.desc")
                         .withStyle(ChatFormatting.GRAY)
         );
     }

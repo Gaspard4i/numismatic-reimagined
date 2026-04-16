@@ -16,10 +16,8 @@ public class CoinItem extends Item {
 
     private final Currency currency;
 
-    public static final int MAX_STACK_SIZE = 99;
-
     public CoinItem(Currency currency, Properties properties) {
-        super(properties.stacksTo(MAX_STACK_SIZE));
+        super(properties);
         this.currency = currency;
     }
 
@@ -39,7 +37,7 @@ public class CoinItem extends Item {
         long totalValue = getStackValue(stack);
         String formatted = CurrencyResolver.formatValue(totalValue);
         tooltipComponents.add(
-                Component.translatable("tooltip.numismatic-reimagined.coin_value", formatted)
+                Component.translatable("tooltip.numismatic_reimagined.coin_value", formatted)
                         .withStyle(ChatFormatting.GOLD)
         );
     }
