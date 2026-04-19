@@ -45,5 +45,19 @@
   "gui.numismatic_reimagined.purse.extract": "Extract",
   "gui.numismatic_reimagined.purse.extract_all": "Extract all (shift+ctrl)",
 
-  "key.numismatic_reimagined.open_purse": "Open purse"
+  "key.numismatic_reimagined.open_purse": "Open purse",
+
+  "gui.numismatic_reimagined.shop.tab.offers": "Offers",
+  "gui.numismatic_reimagined.shop.tab.stock": "Stock",
+  "gui.numismatic_reimagined.shop.test_on": "Test mode",
+  "gui.numismatic_reimagined.shop.test_off": "Stop test",
+  "gui.numismatic_reimagined.shop.new_offer": "+ New offer",
+  "gui.numismatic_reimagined.shop.edit_offer": "Edit offer",
+  "gui.numismatic_reimagined.shop.template": "Template item",
+  "gui.numismatic_reimagined.shop.use_held_item": "Use held item",
+  "gui.numismatic_reimagined.shop.price": "Price (bronze)",
+  "gui.numismatic_reimagined.shop.quantity": "Quantity per purchase",
+  "gui.numismatic_reimagined.shop.confirm": "Confirm",
+  "gui.numismatic_reimagined.shop.cancel": "Cancel",
+  "gui.numismatic_reimagined.shop.withdraw_revenue": "Withdraw %s coins"
 }

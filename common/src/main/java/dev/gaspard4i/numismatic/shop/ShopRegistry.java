@@ -4,6 +4,8 @@ import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
 import dev.gaspard4i.numismatic.NumismaticConstants;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.world.flag.FeatureFlags;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
@@ -28,6 +30,13 @@ public final class ShopRegistry {
     private static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(
             NumismaticConstants.MOD_ID, Registries.BLOCK_ENTITY_TYPE
     );
+    private static final DeferredRegister<MenuType<?>> MENUS = DeferredRegister.create(
+            NumismaticConstants.MOD_ID, Registries.MENU
+    );
+
+    public static final RegistrySupplier<MenuType<ShopMenu>> SHOP_MENU =
+            MENUS.register("shop_menu",
+                    () -> new MenuType<>(ShopMenu::new, FeatureFlags.VANILLA_SET));
 
     public static final RegistrySupplier<Block> SHOP_BLOCK = BLOCKS.register("shop_block",
             () -> new ShopBlock(BlockBehaviour.Properties.of()
@@ -77,6 +86,7 @@ public final class ShopRegistry {
         BLOCKS.register();
         BLOCK_ITEMS.register();
         BLOCK_ENTITIES.register();
+        MENUS.register();
     }
 
     private ShopRegistry() {}

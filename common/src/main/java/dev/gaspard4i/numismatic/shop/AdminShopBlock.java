@@ -16,6 +16,11 @@ public class AdminShopBlock extends ShopBlock {
         super(properties);
     }
 
+    @Override
+    public boolean isAdminVariant() {
+        return true;
+    }
+
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
