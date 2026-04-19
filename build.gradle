@@ -91,8 +91,10 @@ subprojects {
                     "dev/gaspard4i/numismatic/block/Precious*.class",
                     "dev/gaspard4i/numismatic/shop/ShopBlock*.class",
                     "dev/gaspard4i/numismatic/shop/AdminShopBlock*.class",
-                    "dev/gaspard4i/numismatic/shop/ShopMenuOpener*.class",
-                    "dev/gaspard4i/numismatic/shop/ShopStockMenu*.class",
+                    // Shop menu / slot code (hérite d'AbstractContainerMenu / Slot
+                    // vanilla, non-testable sans client MC).
+                    "dev/gaspard4i/numismatic/shop/ShopMenu*.class",
+                    "dev/gaspard4i/numismatic/shop/HideableSlot*.class",
                     // Logic depends on `instanceof CoinItem` / `MoneyBagItem` which
                     // can't be instantiated in tests (registries frozen). Validated in-game.
                     "dev/gaspard4i/numismatic/shop/ShopPaymentHelper*.class",

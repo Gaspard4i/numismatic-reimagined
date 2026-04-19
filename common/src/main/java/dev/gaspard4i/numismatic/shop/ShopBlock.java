@@ -1,13 +1,19 @@
 package dev.gaspard4i.numismatic.shop;
 
 import dev.gaspard4i.numismatic.item.MoneyBagItem;
+import dev.gaspard4i.numismatic.network.NumismaticNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
@@ -103,8 +109,22 @@ public class ShopBlock extends BaseEntityBlock {
         BlockEntity be = level.getBlockEntity(pos);
         if (!(be instanceof ShopBlockEntity shop)) return InteractionResult.PASS;
 
-        ShopMenuMode initialMode = shop.canEdit(player) ? ShopMenuMode.OFFERS : ShopMenuMode.CLIENT;
-        ShopMenuOpener.openFor(player, shop, initialMode);
+        if (player instanceof ServerPlayer sp) {
+            sp.openMenu(new MenuProvider() {
+                @Override
+                public Component getDisplayName() {
+                    return Component.translatable("gui.numismatic_reimagined.shop");
+                }
+
+                @Override
+                public AbstractContainerMenu createMenu(int containerId, Inventory inv, Player p) {
+                    return new ShopMenu(containerId, inv, shop);
+                }
+            });
+            // Push the initial shop state right after the menu is opened so the
+            // client's ClientShopState is populated before the screen renders.
+            NumismaticNetworking.syncShopState(sp, shop);
+        }
         return InteractionResult.CONSUME;
     }
 

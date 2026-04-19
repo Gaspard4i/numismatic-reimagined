@@ -38,9 +38,9 @@ public final class NumismaticShop {
             NumismaticConstants.MOD_ID, Registries.MENU
     );
 
-    public static final RegistrySupplier<MenuType<ShopStockMenu>> SHOP_STOCK_MENU =
-            MENUS.register("shop_stock_menu",
-                    () -> new MenuType<>(ShopStockMenu::new, FeatureFlags.VANILLA_SET));
+    public static final RegistrySupplier<MenuType<ShopMenu>> SHOP_MENU =
+            MENUS.register("shop_menu",
+                    () -> new MenuType<>(ShopMenu::new, FeatureFlags.VANILLA_SET));
 
     public static final RegistrySupplier<Block> SHOP_BLOCK = BLOCKS.register("shop_block",
             () -> new ShopBlock(BlockBehaviour.Properties.of()

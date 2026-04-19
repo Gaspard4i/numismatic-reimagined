@@ -1,10 +1,13 @@
 package dev.gaspard4i.numismatic.forge;
 
+import dev.architectury.registry.menu.MenuRegistry;
 import dev.gaspard4i.numismatic.NumismaticConstants;
 import dev.gaspard4i.numismatic.client.PurseHudOverlay;
+import dev.gaspard4i.numismatic.client.screen.ShopScreen;
 import dev.gaspard4i.numismatic.item.MoneyBagItem;
 import dev.gaspard4i.numismatic.item.NumismaticItems;
 import dev.gaspard4i.numismatic.network.ClientCurrencyData;
+import dev.gaspard4i.numismatic.shop.NumismaticShop;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
@@ -40,6 +43,8 @@ public class NumismaticReimaginedForgeClient {
             ResourceLocation bagTierId = new ResourceLocation(NumismaticConstants.MOD_ID, "bag_tier");
             ItemProperties.register(NumismaticItems.MONEY_BAG.get(), bagTierId,
                     (stack, level, entity, seed) -> MoneyBagItem.getTierFloat(stack));
+
+            MenuRegistry.registerScreenFactory(NumismaticShop.SHOP_MENU.get(), ShopScreen::new);
         });
     }
 

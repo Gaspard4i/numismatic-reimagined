@@ -12,13 +12,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * Popup screen to create or edit a single shop offer. Drop an item from
- * inventory onto the template slot to set the template; type price + quantity.
- *
- * <p>Uses left-click on the template slot to copy the player's currently
- * carried (held cursor) stack as the new template — the carried item is not
- * consumed. To support a smooth UX without a full container, we simply use
- * the player's main hand item as a template when "Use Held Item" is clicked.
+ * Modal popup to create/edit a single shop offer. The template item is
+ * captured from the player's current main hand via "Use held item" button —
+ * the held stack is not consumed, we only copy its item + NBT.
  */
 public class OfferEditScreen extends Screen {
 
@@ -36,8 +32,8 @@ public class OfferEditScreen extends Screen {
         this.parent = parent;
         this.slotIndex = slotIndex;
         this.template = template.copy();
-        this.price = price;
-        this.qty = qty;
+        this.price = Math.max(1, price);
+        this.qty = Math.max(1, qty);
     }
 
     @Override
@@ -84,7 +80,9 @@ public class OfferEditScreen extends Screen {
         try {
             p = Long.parseLong(priceBox.getValue());
             q = Integer.parseInt(qtyBox.getValue());
-        } catch (NumberFormatException ex) { return; }
+        } catch (NumberFormatException ex) {
+            return;
+        }
         if (p <= 0 || q <= 0) return;
         if (ClientShopState.getPos() == null) return;
         NumismaticNetworking.sendEditOffer(ClientShopState.getPos(), slotIndex, template, p, q);
@@ -96,10 +94,8 @@ public class OfferEditScreen extends Screen {
         renderBackground(g);
         int cx = this.width / 2;
         int cy = this.height / 2;
-        // Background panel
         g.fill(cx - 110, cy - 80, cx + 110, cy + 100, 0xE0101010);
         g.drawCenteredString(this.font, this.title, cx, cy - 75, 0xFFFFFF);
-        // Template item
         g.drawString(this.font, Component.translatable("gui.numismatic_reimagined.shop.template"),
                 cx - 60, cy - 60, 0xAAAAAA, false);
         g.fill(cx - 10, cy - 50, cx + 10, cy - 30, 0xFF333333);
@@ -115,5 +111,7 @@ public class OfferEditScreen extends Screen {
     }
 
     @Override
-    public boolean isPauseScreen() { return false; }
+    public boolean isPauseScreen() {
+        return false;
+    }
 }

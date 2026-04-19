@@ -3,12 +3,10 @@ package dev.gaspard4i.numismatic.network;
 import dev.architectury.networking.NetworkManager;
 import dev.gaspard4i.numismatic.NumismaticConstants;
 import dev.gaspard4i.numismatic.currency.CurrencyHelper;
-import dev.gaspard4i.numismatic.currency.CurrencyResolver;
 import dev.gaspard4i.numismatic.currency.PlayerCurrencyManager;
 import dev.gaspard4i.numismatic.item.MoneyBagItem;
 import dev.gaspard4i.numismatic.shop.OfferList;
 import dev.gaspard4i.numismatic.shop.ShopBlockEntity;
-import dev.gaspard4i.numismatic.shop.ShopMenuMode;
 import dev.gaspard4i.numismatic.shop.ShopOffer;
 import dev.gaspard4i.numismatic.shop.ShopPaymentHelper;
 import net.minecraft.core.BlockPos;
@@ -18,8 +16,6 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.ContainerHelper;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -42,11 +38,6 @@ public final class NumismaticNetworking {
     // C2S: Player requests to withdraw a specific amount from purse
     public static final ResourceLocation WITHDRAW_C2S = new ResourceLocation(
             NumismaticConstants.MOD_ID, "withdraw"
-    );
-
-    // S2C: Server tells client to open the shop screen with a given mode + state
-    public static final ResourceLocation OPEN_SHOP_SCREEN_S2C = new ResourceLocation(
-            NumismaticConstants.MOD_ID, "open_shop_screen"
     );
 
     // S2C: Server pushes updated shop state to a viewing client
@@ -72,11 +63,6 @@ public final class NumismaticNetworking {
     // C2S: Owner withdraws accumulated revenue
     public static final ResourceLocation WITHDRAW_REVENUE_C2S = new ResourceLocation(
             NumismaticConstants.MOD_ID, "withdraw_revenue"
-    );
-
-    // C2S: Player switches between shop tabs (owner mode)
-    public static final ResourceLocation SWITCH_SHOP_TAB_C2S = new ResourceLocation(
-            NumismaticConstants.MOD_ID, "switch_shop_tab"
     );
 
     private NumismaticNetworking() {}
@@ -202,17 +188,6 @@ public final class NumismaticNetworking {
             });
         });
 
-        NetworkManager.registerReceiver(NetworkManager.Side.C2S, SWITCH_SHOP_TAB_C2S, (buf, context) -> {
-            BlockPos pos = buf.readBlockPos();
-            ShopMenuMode requested = ShopMenuMode.values()[buf.readVarInt()];
-            context.queue(() -> {
-                if (!(context.getPlayer() instanceof ServerPlayer sp)) return;
-                ShopBlockEntity shop = resolveShop(sp.serverLevel(), pos);
-                if (shop == null) return;
-                ShopMenuMode mode = shop.canEdit(sp) ? requested : ShopMenuMode.CLIENT;
-                openShopScreen(sp, shop, mode);
-            });
-        });
     }
 
     private static ShopBlockEntity resolveShop(Level level, BlockPos pos) {
@@ -248,19 +223,6 @@ public final class NumismaticNetworking {
     }
 
     // ---------------- Shop S2C / send helpers ----------------
-
-    /**
-     * Tells the client to open the shop screen with a fresh state snapshot.
-     */
-    public static void openShopScreen(ServerPlayer player, ShopBlockEntity shop, ShopMenuMode mode) {
-        FriendlyByteBuf buf = new FriendlyByteBuf(io.netty.buffer.Unpooled.buffer());
-        buf.writeBlockPos(shop.getBlockPos());
-        buf.writeVarInt(mode.ordinal());
-        buf.writeBoolean(shop.canEdit(player));
-        buf.writeBoolean(shop.isAdmin());
-        writeShopStatePayload(buf, shop);
-        NetworkManager.sendToPlayer(player, OPEN_SHOP_SCREEN_S2C, buf);
-    }
 
     /**
      * Pushes the current shop state to the player (after edit / purchase /
@@ -314,10 +276,4 @@ public final class NumismaticNetworking {
         NetworkManager.sendToServer(WITHDRAW_REVENUE_C2S, buf);
     }
 
-    public static void sendSwitchShopTab(BlockPos pos, ShopMenuMode mode) {
-        FriendlyByteBuf buf = new FriendlyByteBuf(io.netty.buffer.Unpooled.buffer());
-        buf.writeBlockPos(pos);
-        buf.writeVarInt(mode.ordinal());
-        NetworkManager.sendToServer(SWITCH_SHOP_TAB_C2S, buf);
-    }
 }
