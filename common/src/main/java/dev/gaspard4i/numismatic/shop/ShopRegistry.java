@@ -4,8 +4,6 @@ import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
 import dev.gaspard4i.numismatic.NumismaticConstants;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.world.flag.FeatureFlags;
-import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
@@ -18,29 +16,18 @@ import net.minecraft.world.level.material.PushReaction;
 
 /**
  * Registers shop blocks, their item forms, and their block entity types.
- * Called from the main mod entrypoint.
  */
-public final class NumismaticShop {
+public final class ShopRegistry {
 
     private static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(
             NumismaticConstants.MOD_ID, Registries.BLOCK
     );
-
     private static final DeferredRegister<Item> BLOCK_ITEMS = DeferredRegister.create(
             NumismaticConstants.MOD_ID, Registries.ITEM
     );
-
     private static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(
             NumismaticConstants.MOD_ID, Registries.BLOCK_ENTITY_TYPE
     );
-
-    private static final DeferredRegister<MenuType<?>> MENUS = DeferredRegister.create(
-            NumismaticConstants.MOD_ID, Registries.MENU
-    );
-
-    public static final RegistrySupplier<MenuType<ShopMenu>> SHOP_MENU =
-            MENUS.register("shop_menu",
-                    () -> new MenuType<>(ShopMenu::new, FeatureFlags.VANILLA_SET));
 
     public static final RegistrySupplier<Block> SHOP_BLOCK = BLOCKS.register("shop_block",
             () -> new ShopBlock(BlockBehaviour.Properties.of()
@@ -51,7 +38,6 @@ public final class NumismaticShop {
                     .pushReaction(PushReaction.BLOCK)
             )
     );
-
     public static final RegistrySupplier<Item> SHOP_BLOCK_ITEM = BLOCK_ITEMS.register("shop_block",
             () -> new BlockItem(SHOP_BLOCK.get(), new Item.Properties())
     );
@@ -60,7 +46,7 @@ public final class NumismaticShop {
     public static final RegistrySupplier<BlockEntityType<ShopBlockEntity>> SHOP_BLOCK_ENTITY =
             BLOCK_ENTITIES.register("shop_block",
                     () -> BlockEntityType.Builder.of(
-                            (pos, state) -> new ShopBlockEntity(NumismaticShop.SHOP_BLOCK_ENTITY.get(), pos, state),
+                            (pos, state) -> new ShopBlockEntity(ShopRegistry.SHOP_BLOCK_ENTITY.get(), pos, state),
                             SHOP_BLOCK.get()
                     ).build(null)
             );
@@ -68,13 +54,12 @@ public final class NumismaticShop {
     public static final RegistrySupplier<Block> ADMIN_SHOP_BLOCK = BLOCKS.register("admin_shop_block",
             () -> new AdminShopBlock(BlockBehaviour.Properties.of()
                     .mapColor(MapColor.GOLD)
-                    .strength(-1.0f, 3600000.0f) // unbreakable like bedrock
+                    .strength(-1.0f, 3600000.0f)
                     .sound(SoundType.METAL)
                     .noOcclusion()
                     .pushReaction(PushReaction.BLOCK)
             )
     );
-
     public static final RegistrySupplier<Item> ADMIN_SHOP_BLOCK_ITEM = BLOCK_ITEMS.register("admin_shop_block",
             () -> new BlockItem(ADMIN_SHOP_BLOCK.get(), new Item.Properties().rarity(Rarity.EPIC))
     );
@@ -83,11 +68,7 @@ public final class NumismaticShop {
     public static final RegistrySupplier<BlockEntityType<ShopBlockEntity>> ADMIN_SHOP_BLOCK_ENTITY =
             BLOCK_ENTITIES.register("admin_shop_block",
                     () -> BlockEntityType.Builder.of(
-                            (pos, state) -> {
-                                ShopBlockEntity be = new ShopBlockEntity(NumismaticShop.ADMIN_SHOP_BLOCK_ENTITY.get(), pos, state);
-                                be.setAdmin(true);
-                                return be;
-                            },
+                            (pos, state) -> new ShopBlockEntity(ShopRegistry.ADMIN_SHOP_BLOCK_ENTITY.get(), pos, state),
                             ADMIN_SHOP_BLOCK.get()
                     ).build(null)
             );
@@ -96,8 +77,7 @@ public final class NumismaticShop {
         BLOCKS.register();
         BLOCK_ITEMS.register();
         BLOCK_ENTITIES.register();
-        MENUS.register();
     }
 
-    private NumismaticShop() {}
+    private ShopRegistry() {}
 }

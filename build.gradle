@@ -89,17 +89,9 @@ subprojects {
                     "dev/gaspard4i/numismatic/block/Golden*.class",
                     "dev/gaspard4i/numismatic/block/Netherite*.class",
                     "dev/gaspard4i/numismatic/block/Precious*.class",
-                    "dev/gaspard4i/numismatic/shop/ShopBlock*.class",
-                    "dev/gaspard4i/numismatic/shop/AdminShopBlock*.class",
-                    // Shop menu / slot code (hérite d'AbstractContainerMenu / Slot
-                    // vanilla, non-testable sans client MC).
-                    "dev/gaspard4i/numismatic/shop/ShopMenu*.class",
-                    "dev/gaspard4i/numismatic/shop/HideableSlot*.class",
-                    // Logic depends on `instanceof CoinItem` / `MoneyBagItem` which
-                    // can't be instantiated in tests (registries frozen). Validated in-game.
-                    "dev/gaspard4i/numismatic/shop/ShopPaymentHelper*.class",
-                    // Thin wrapper around Player.hasPermissions; trivial.
-                    "dev/gaspard4i/numismatic/shop/PermissionHelper*.class",
+                    // All shop classes touch MC runtime (Block, BlockEntity,
+                    // ChestMenu) and are validated in-game via STATUS.md.
+                    "dev/gaspard4i/numismatic/shop/**",
                     // Items (besoin Player + ItemStack vivant)
                     "dev/gaspard4i/numismatic/item/CoinItem*.class",
                     "dev/gaspard4i/numismatic/item/MoneyBagItem*.class",

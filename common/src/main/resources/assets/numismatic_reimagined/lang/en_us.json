@@ -38,24 +38,5 @@
   "command.numismatic_reimagined.give_bag": "Gave a money bag worth %s",
 
   "block.numismatic_reimagined.shop_block": "Player Shop",
-  "block.numismatic_reimagined.admin_shop_block": "Admin Shop",
-  "gui.numismatic_reimagined.shop": "Shop",
-  "gui.numismatic_reimagined.shop.tab.offers": "Offers",
-  "gui.numismatic_reimagined.shop.tab.stock": "Stock",
-  "gui.numismatic_reimagined.shop.tab.client": "Buy",
-  "gui.numismatic_reimagined.shop.new_offer": "+ New offer",
-  "gui.numismatic_reimagined.shop.edit_offer": "Edit offer",
-  "gui.numismatic_reimagined.shop.template": "Template item",
-  "gui.numismatic_reimagined.shop.use_held_item": "Use held item",
-  "gui.numismatic_reimagined.shop.price": "Price (bronze)",
-  "gui.numismatic_reimagined.shop.quantity": "Quantity per purchase",
-  "gui.numismatic_reimagined.shop.confirm": "Confirm",
-  "gui.numismatic_reimagined.shop.cancel": "Cancel",
-  "gui.numismatic_reimagined.shop.withdraw_revenue": "Withdraw Revenue (%s coins)",
-  "gui.numismatic_reimagined.shop.revenue": "Revenue: %s coins",
-  "gui.numismatic_reimagined.shop.stock_hint": "Place items here to enable matching offers",
-  "gui.numismatic_reimagined.shop.error.insufficient_funds": "Insufficient funds",
-  "gui.numismatic_reimagined.shop.error.stock_empty": "Out of stock",
-  "gui.numismatic_reimagined.shop.error.not_owner": "Not the shop owner",
-  "gui.numismatic_reimagined.shop.error.cannot_sell_currency": "Coins and money bags cannot be sold"
+  "block.numismatic_reimagined.admin_shop_block": "Admin Shop"
 }

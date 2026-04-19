@@ -6,8 +6,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Server/admin variant of the shop. No owner, infinite stock, OP-only edit.
- * Not craftable — only obtainable via creative or {@code /give}.
+ * Admin variant of the shop block. Same hitbox, different texture; backed by
+ * its own block entity type so loot tables and recipes can target it
+ * independently.
  */
 public class AdminShopBlock extends ShopBlock {
 
@@ -15,16 +16,9 @@ public class AdminShopBlock extends ShopBlock {
         super(properties);
     }
 
-    @Override
-    public boolean isAdminVariant() {
-        return true;
-    }
-
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        ShopBlockEntity be = new ShopBlockEntity(NumismaticShop.ADMIN_SHOP_BLOCK_ENTITY.get(), pos, state);
-        be.setAdmin(true);
-        return be;
+        return new ShopBlockEntity(ShopRegistry.ADMIN_SHOP_BLOCK_ENTITY.get(), pos, state);
     }
 }

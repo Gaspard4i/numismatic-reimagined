@@ -1,13 +1,10 @@
 package dev.gaspard4i.numismatic.fabric;
 
-import dev.architectury.registry.menu.MenuRegistry;
 import dev.gaspard4i.numismatic.NumismaticConstants;
 import dev.gaspard4i.numismatic.client.PurseHudOverlay;
-import dev.gaspard4i.numismatic.client.screen.ShopScreen;
 import dev.gaspard4i.numismatic.item.MoneyBagItem;
 import dev.gaspard4i.numismatic.item.NumismaticItems;
 import dev.gaspard4i.numismatic.network.ClientCurrencyData;
-import dev.gaspard4i.numismatic.shop.NumismaticShop;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.renderer.item.ItemProperties;
@@ -38,9 +35,6 @@ public class NumismaticReimaginedFabricClient implements ClientModInitializer {
         ResourceLocation bagTierId = new ResourceLocation(NumismaticConstants.MOD_ID, "bag_tier");
         ItemProperties.register(NumismaticItems.MONEY_BAG.get(), bagTierId,
                 (stack, level, entity, seed) -> MoneyBagItem.getTierFloat(stack));
-
-        // Register the shop screen factory for the shop menu type.
-        MenuRegistry.registerScreenFactory(NumismaticShop.SHOP_MENU.get(), ShopScreen::new);
 
         // Register purse HUD overlay
         HudRenderCallback.EVENT.register((guiGraphics, tickDelta) ->
