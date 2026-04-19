@@ -1,3 +1,7 @@
+<p align="center">
+  <img src=".github/assets/logo.png" alt="Numismatic Reimagined" width="180" />
+</p>
+
 # Numismatic Reimagined
 
 [![Build & Test](https://github.com/Gaspard4i/numismatic-reimagined/actions/workflows/build.yml/badge.svg)](https://github.com/Gaspard4i/numismatic-reimagined/actions/workflows/build.yml)
