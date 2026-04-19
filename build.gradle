@@ -41,6 +41,12 @@ subprojects {
         withSourcesJar()
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+        // Use Gradle toolchains: Gradle auto-downloads/selects a JDK 21 if the
+        // current Gradle daemon is running on something else (e.g., Java 25
+        // which crashes Sponge Mixin with "Unsupported class file major version").
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(21)
+        }
     }
 
     tasks.withType(JavaCompile).configureEach {

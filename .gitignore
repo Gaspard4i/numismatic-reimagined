@@ -30,6 +30,7 @@ bin/
 
 # Local config
 local.properties
+gradle-local.properties
 
 # Architectury
 .architectury-transformer/
