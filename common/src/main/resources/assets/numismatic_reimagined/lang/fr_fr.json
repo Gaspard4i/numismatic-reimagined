@@ -45,8 +45,6 @@
   "gui.numismatic_reimagined.purse.extract": "Retirer",
   "gui.numismatic_reimagined.purse.extract_all": "Tout retirer (shift+ctrl)",
 
-  "key.numismatic_reimagined.open_purse": "Ouvrir la bourse",
-
   "gui.numismatic_reimagined.shop.tab.offers": "Offres",
   "gui.numismatic_reimagined.shop.tab.stock": "Stock",
   "gui.numismatic_reimagined.shop.test_on": "Mode test",

@@ -45,8 +45,6 @@
   "gui.numismatic_reimagined.purse.extract": "Extract",
   "gui.numismatic_reimagined.purse.extract_all": "Extract all (shift+ctrl)",
 
-  "key.numismatic_reimagined.open_purse": "Open purse",
-
   "gui.numismatic_reimagined.shop.tab.offers": "Offers",
   "gui.numismatic_reimagined.shop.tab.stock": "Stock",
   "gui.numismatic_reimagined.shop.test_on": "Test mode",

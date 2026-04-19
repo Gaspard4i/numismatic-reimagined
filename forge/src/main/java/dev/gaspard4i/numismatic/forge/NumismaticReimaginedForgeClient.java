@@ -3,7 +3,6 @@ package dev.gaspard4i.numismatic.forge;
 import dev.architectury.registry.menu.MenuRegistry;
 import dev.gaspard4i.numismatic.NumismaticConstants;
 import dev.gaspard4i.numismatic.client.PurseHudOverlay;
-import dev.gaspard4i.numismatic.client.PurseInventoryHook;
 import dev.gaspard4i.numismatic.client.screen.ShopScreen;
 import dev.gaspard4i.numismatic.item.MoneyBagItem;
 import dev.gaspard4i.numismatic.item.NumismaticItems;
@@ -26,8 +25,7 @@ public class NumismaticReimaginedForgeClient {
         // Register client-side packet receivers
         ClientCurrencyData.registerClientReceivers();
 
-        // Register purse button on inventory screen
-        PurseInventoryHook.register();
+        // Note: ForgePurseInventoryHook is auto-registered via @Mod.EventBusSubscriber
 
         event.enqueueWork(() -> {
             ResourceLocation bagTierId = new ResourceLocation(NumismaticConstants.MOD_ID, "bag_tier");
