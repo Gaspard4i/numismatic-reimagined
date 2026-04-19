@@ -55,6 +55,8 @@ public final class NumismaticItems {
                         output.accept(new ItemStack(NumismaticBlocks.PIGGY_BANK_ITEM.get()));
                         output.accept(new ItemStack(NumismaticBlocks.GOLDEN_PIGGY_BANK_ITEM.get()));
                         output.accept(new ItemStack(NumismaticBlocks.NETHERITE_PIGGY_BANK_ITEM.get()));
+                        output.accept(new ItemStack(dev.gaspard4i.numismatic.shop.NumismaticShop.SHOP_BLOCK_ITEM.get()));
+                        output.accept(new ItemStack(dev.gaspard4i.numismatic.shop.NumismaticShop.ADMIN_SHOP_BLOCK_ITEM.get()));
                     })
             )
     );

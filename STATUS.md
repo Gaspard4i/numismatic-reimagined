@@ -22,11 +22,11 @@
 - Notes : 3 variantes (base/golden/netherite) avec capacités max-1 (9999B / 999999B / 999999999B). Clic droit = insère 1 unité avec rendu du change en money bag. Shift-clic = dépose tout l'inventaire. Silk touch préserve les contenus. Recettes craft. Stack à 99 via mixin Slot. Bug créatif → inventaire en cours de validation.
 
 ## Phase 4 : Shop Block (redesigné)
-- [ ] Implémenté
+- [x] Implémenté
 - [ ] Tests unitaires (coverage: ?%)
 - [ ] Testé manuellement par l'utilisateur
 - [ ] Issues résolues
-- Notes : -
+- Notes : 2 blocs (ShopBlock craftable, AdminShopBlock unbreakable+epic). Owner = placeur. ShopBlockEntity (27 slots stock + 81 offres + revenu). 3 onglets owner (Offers/Stock/Client). Achat coins/bags inventaire uniquement (jamais purse). Drop stock+revenu si cassé. Indéplaçable par piston. Permissions OP2 admin shop (compatible LuckPerms). Validation utilisateur en attente.
 
 ## Phase 5 : Configuration
 - [ ] Implémenté

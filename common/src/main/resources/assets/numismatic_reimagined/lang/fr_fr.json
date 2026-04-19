@@ -35,5 +35,27 @@
   "command.numismatic_reimagined.withdraw.insufficient": "Fonds insuffisants",
   "command.numismatic_reimagined.set": "Solde de %s défini à %s",
   "command.numismatic_reimagined.give": "%s donné(s) à %s",
-  "command.numismatic_reimagined.give_bag": "Bourse donnée d'une valeur de %s"
+  "command.numismatic_reimagined.give_bag": "Bourse donnée d'une valeur de %s",
+
+  "block.numismatic_reimagined.shop_block": "Boutique de joueur",
+  "block.numismatic_reimagined.admin_shop_block": "Boutique admin",
+  "gui.numismatic_reimagined.shop": "Boutique",
+  "gui.numismatic_reimagined.shop.tab.offers": "Offres",
+  "gui.numismatic_reimagined.shop.tab.stock": "Stock",
+  "gui.numismatic_reimagined.shop.tab.client": "Acheter",
+  "gui.numismatic_reimagined.shop.new_offer": "+ Nouvelle offre",
+  "gui.numismatic_reimagined.shop.edit_offer": "Modifier l'offre",
+  "gui.numismatic_reimagined.shop.template": "Item modèle",
+  "gui.numismatic_reimagined.shop.use_held_item": "Utiliser l'item en main",
+  "gui.numismatic_reimagined.shop.price": "Prix (bronze)",
+  "gui.numismatic_reimagined.shop.quantity": "Quantité par achat",
+  "gui.numismatic_reimagined.shop.confirm": "Confirmer",
+  "gui.numismatic_reimagined.shop.cancel": "Annuler",
+  "gui.numismatic_reimagined.shop.withdraw_revenue": "Retirer le revenu (%s coins)",
+  "gui.numismatic_reimagined.shop.revenue": "Revenu : %s coins",
+  "gui.numismatic_reimagined.shop.stock_hint": "Placez des items ici pour activer les offres correspondantes",
+  "gui.numismatic_reimagined.shop.error.insufficient_funds": "Fonds insuffisants",
+  "gui.numismatic_reimagined.shop.error.stock_empty": "Stock épuisé",
+  "gui.numismatic_reimagined.shop.error.not_owner": "Vous n'êtes pas le propriétaire",
+  "gui.numismatic_reimagined.shop.error.cannot_sell_currency": "Les pièces et sacs ne peuvent pas être vendus"
 }
