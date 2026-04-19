@@ -23,20 +23,6 @@ public class NumismaticReimaginedForgeClient {
         ClientCurrencyData.registerClientReceivers();
 
         event.enqueueWork(() -> {
-            ResourceLocation coinsId = new ResourceLocation(NumismaticConstants.MOD_ID, "coins");
-
-            ItemProperties.register(NumismaticItems.BRONZE_COIN.get(), coinsId,
-                    (stack, level, entity, seed) -> stack.getCount() / 99.0f);
-            ItemProperties.register(NumismaticItems.SILVER_COIN.get(), coinsId,
-                    (stack, level, entity, seed) -> stack.getCount() / 99.0f);
-            ItemProperties.register(NumismaticItems.GOLD_COIN.get(), coinsId,
-                    (stack, level, entity, seed) -> stack.getCount() / 99.0f);
-            ItemProperties.register(NumismaticItems.NETHERITE_COIN.get(), coinsId,
-                    (stack, level, entity, seed) -> stack.getCount() / 99.0f);
-            ItemProperties.register(NumismaticItems.STAR_COIN.get(), coinsId,
-                    (stack, level, entity, seed) -> stack.getCount() / 99.0f);
-
-            // Money bag tier predicate
             ResourceLocation bagTierId = new ResourceLocation(NumismaticConstants.MOD_ID, "bag_tier");
             ItemProperties.register(NumismaticItems.MONEY_BAG.get(), bagTierId,
                     (stack, level, entity, seed) -> MoneyBagItem.getTierFloat(stack));

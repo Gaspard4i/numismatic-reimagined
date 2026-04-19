@@ -4,11 +4,7 @@
   "compatibilityLevel": "JAVA_17",
   "minVersion": "0.8",
   "client": [],
-  "mixins": [
-    "CreativeSlotPacketMixin",
-    "InventoryMixin",
-    "SlotMixin"
-  ],
+  "mixins": [],
   "injectors": {
     "defaultRequire": 1
   }

@@ -2,11 +2,5 @@
   "parent": "minecraft:item/generated",
   "textures": {
     "layer0": "numismatic_reimagined:item/bronze_coin"
-  },
-  "overrides": [
-    { "predicate": { "numismatic_reimagined:coins": 0.05 }, "model": "numismatic_reimagined:item/bronze_coin_0" },
-    { "predicate": { "numismatic_reimagined:coins": 0.25 }, "model": "numismatic_reimagined:item/bronze_coin_1" },
-    { "predicate": { "numismatic_reimagined:coins": 0.50 }, "model": "numismatic_reimagined:item/bronze_coin_2" },
-    { "predicate": { "numismatic_reimagined:coins": 0.75 }, "model": "numismatic_reimagined:item/bronze_coin_3" }
-  ]
+  }
 }

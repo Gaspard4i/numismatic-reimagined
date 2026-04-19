@@ -17,20 +17,6 @@ public class NumismaticReimaginedFabricClient implements ClientModInitializer {
         // Register client-side packet receivers
         ClientCurrencyData.registerClientReceivers();
 
-        // Register model predicates for stack-count textures
-        ResourceLocation coinsId = new ResourceLocation(NumismaticConstants.MOD_ID, "coins");
-
-        ItemProperties.register(NumismaticItems.BRONZE_COIN.get(), coinsId,
-                (stack, level, entity, seed) -> stack.getCount() / 99.0f);
-        ItemProperties.register(NumismaticItems.SILVER_COIN.get(), coinsId,
-                (stack, level, entity, seed) -> stack.getCount() / 99.0f);
-        ItemProperties.register(NumismaticItems.GOLD_COIN.get(), coinsId,
-                (stack, level, entity, seed) -> stack.getCount() / 99.0f);
-        ItemProperties.register(NumismaticItems.NETHERITE_COIN.get(), coinsId,
-                (stack, level, entity, seed) -> stack.getCount() / 99.0f);
-        ItemProperties.register(NumismaticItems.STAR_COIN.get(), coinsId,
-                (stack, level, entity, seed) -> stack.getCount() / 99.0f);
-
         // Register model predicate for money bag tiers
         ResourceLocation bagTierId = new ResourceLocation(NumismaticConstants.MOD_ID, "bag_tier");
         ItemProperties.register(NumismaticItems.MONEY_BAG.get(), bagTierId,
