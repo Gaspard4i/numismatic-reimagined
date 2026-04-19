@@ -21,12 +21,22 @@
 - [x] Issues résolues (bug créatif corrigé via SlotMixin + CreativeSlotPacketMixin)
 - Notes : 3 variantes (base/golden/netherite) avec capacités max-1 (9999B / 999999B / 999999999B). Shift-clic = dépose stack en main. Silk touch préserve les contenus. Logique pure extraite dans PiggyBankAccount pour testabilité.
 
-## Phase 4 : Shop Block (redesigné)
-- [x] Implémenté
-- [x] Tests unitaires (ShopOffer 92%, OfferList 99%, ShopRevenue 100%, ShopStockOps 99%, ShopMenuMode 100%, global 98%)
+## Phase 4 : Shop Block (refonte avec lib UI custom)
+- [x] Implémenté (3 lots: lib UI, purse popup, shop refonte)
+- [x] Tests unitaires (ShopOffer + OfferList, global 98% sur testable)
 - [ ] Testé manuellement par l'utilisateur
 - [ ] Issues résolues
-- Notes : 2 blocs (ShopBlock craftable, AdminShopBlock unbreakable+epic). Owner = placeur. ShopBlockEntity (27 slots stock + 81 offres + revenu). 3 onglets owner (Offers/Stock/Client). Logique pure extraite dans ShopStockOps + ShopRevenue. Validation utilisateur en attente (checklist dans rapport commit).
+- Notes :
+  * Lib UI custom dans common/client/widgets/ (GuiTextures, CompositeWidget, IconButton, TabSelector, ScrollableList) inspirée de Create
+  * UI Purse popup accessible via keybind P (configurable) depuis le monde ou l'inventaire vanilla, avec sliders +/- par dénomination (bronze/silver/gold/netherite)
+  * Shop refonte: ShopBlock + AdminShopBlock, ShopBlockEntity étendu (owner UUID, isAdmin, OfferList, revenu)
+  * ShopMenu vanilla AbstractContainerMenu (27 stock + player inv)
+  * ShopScreen avec 2 onglets (Offers / Stock) + bouton "Test mode" toggle
+  * OfferEditScreen popup pour créer/éditer offres
+  * ShopPaymentHelper paie depuis inventaire physique uniquement
+  * 4 packets shop + sync state S2C
+  * Max 56 offres par shop
+  * Stack de coins ramené à 64 vanilla (suppression de 3 mixins fragiles)
 
 ## Phase 5 : Configuration
 - [ ] Implémenté

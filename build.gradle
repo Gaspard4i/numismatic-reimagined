@@ -89,9 +89,13 @@ subprojects {
                     "dev/gaspard4i/numismatic/block/Golden*.class",
                     "dev/gaspard4i/numismatic/block/Netherite*.class",
                     "dev/gaspard4i/numismatic/block/Precious*.class",
-                    // All shop classes touch MC runtime (Block, BlockEntity,
-                    // ChestMenu) and are validated in-game via STATUS.md.
-                    "dev/gaspard4i/numismatic/shop/**",
+                    // Shop classes touchant MC runtime, validées en jeu.
+                    // ShopOffer + OfferList sont logique pure et SONT testés.
+                    "dev/gaspard4i/numismatic/shop/ShopBlock*.class",
+                    "dev/gaspard4i/numismatic/shop/AdminShopBlock*.class",
+                    "dev/gaspard4i/numismatic/shop/ShopMenu*.class",
+                    "dev/gaspard4i/numismatic/shop/ShopRegistry*.class",
+                    "dev/gaspard4i/numismatic/shop/ShopPaymentHelper*.class",
                     // Items (besoin Player + ItemStack vivant)
                     "dev/gaspard4i/numismatic/item/CoinItem*.class",
                     "dev/gaspard4i/numismatic/item/MoneyBagItem*.class",
