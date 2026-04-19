@@ -35,7 +35,7 @@ public class ShopBlockEntity extends BlockEntity {
     private boolean isAdmin = false;
     private OfferList offers = new OfferList();
     private final NonNullList<ItemStack> stock = NonNullList.withSize(STOCK_SIZE, ItemStack.EMPTY);
-    private long accumulatedRevenue = 0;
+    private final ShopRevenue revenue = new ShopRevenue();
 
     /**
      * Constructor used by the registered block entity type. Subclasses or
@@ -102,13 +102,12 @@ public class ShopBlockEntity extends BlockEntity {
     // --- Revenue ---
 
     public long getAccumulatedRevenue() {
-        return accumulatedRevenue;
+        return revenue.get();
     }
 
     public void addRevenue(long amount) {
-        if (amount <= 0 || isAdmin) return;
-        accumulatedRevenue += amount;
-        setChanged();
+        if (isAdmin) return;
+        if (revenue.add(amount) > 0) setChanged();
     }
 
     /**
@@ -116,9 +115,8 @@ public class ShopBlockEntity extends BlockEntity {
      * stored. Caller is responsible for delivering it (e.g. as a money bag).
      */
     public long withdrawRevenue() {
-        long current = accumulatedRevenue;
-        accumulatedRevenue = 0;
-        setChanged();
+        long current = revenue.withdraw();
+        if (current > 0) setChanged();
         return current;
     }
 
@@ -133,12 +131,7 @@ public class ShopBlockEntity extends BlockEntity {
      */
     public int countMatchingItems(ItemStack template) {
         if (isAdmin) return Integer.MAX_VALUE;
-        if (template.isEmpty()) return 0;
-        int total = 0;
-        for (ItemStack s : stock) {
-            if (matchesTemplate(s, template)) total += s.getCount();
-        }
-        return total;
+        return ShopStockOps.countMatching(stock, template);
     }
 
     /**
@@ -157,31 +150,9 @@ public class ShopBlockEntity extends BlockEntity {
      */
     public boolean consumeStock(ShopOffer offer) {
         if (isAdmin) return true;
-        if (!hasStockFor(offer)) return false;
-        int remaining = offer.quantityPerPurchase();
-        for (int i = 0; i < stock.size() && remaining > 0; i++) {
-            ItemStack s = stock.get(i);
-            if (!matchesTemplate(s, offer.template())) continue;
-            int toTake = Math.min(remaining, s.getCount());
-            s.shrink(toTake);
-            remaining -= toTake;
-        }
-        setChanged();
-        return remaining == 0;
-    }
-
-    /**
-     * Strict template match: same Item + same tag (NBT). Counts and damage
-     * are intentionally ignored.
-     */
-    private static boolean matchesTemplate(ItemStack stack, ItemStack template) {
-        if (stack.isEmpty()) return false;
-        if (!stack.is(template.getItem())) return false;
-        CompoundTag a = stack.getTag();
-        CompoundTag b = template.getTag();
-        if (a == null && b == null) return true;
-        if (a == null || b == null) return false;
-        return a.equals(b);
+        boolean ok = ShopStockOps.consume(stock, offer.template(), offer.quantityPerPurchase());
+        if (ok) setChanged();
+        return ok;
     }
 
     // --- NBT ---
@@ -195,7 +166,7 @@ public class ShopBlockEntity extends BlockEntity {
         CompoundTag stockTag = new CompoundTag();
         ContainerHelper.saveAllItems(stockTag, stock);
         tag.put(TAG_STOCK, stockTag);
-        tag.putLong(TAG_REVENUE, accumulatedRevenue);
+        tag.putLong(TAG_REVENUE, revenue.get());
     }
 
     @Override
@@ -207,6 +178,13 @@ public class ShopBlockEntity extends BlockEntity {
         stock.clear();
         for (int i = 0; i < STOCK_SIZE; i++) stock.set(i, ItemStack.EMPTY);
         ContainerHelper.loadAllItems(tag.getCompound(TAG_STOCK), stock);
-        accumulatedRevenue = tag.getLong(TAG_REVENUE);
+        // Re-seed revenue from persisted value
+        long stored = tag.getLong(TAG_REVENUE);
+        long delta = stored - revenue.get();
+        if (delta > 0) revenue.add(delta);
+        else if (delta < 0) {
+            revenue.withdraw();
+            if (stored > 0) revenue.add(stored);
+        }
     }
 }

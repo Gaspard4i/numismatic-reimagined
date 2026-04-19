@@ -26,52 +26,47 @@ public class PiggyBankBlockEntity extends BlockEntity {
     // Netherite: 1 Star Coin (1000 Netherite) - 1 = 999,999,999 bronze
     public static final long NETHERITE_MAX_VALUE = 1000L * Currency.NETHERITE.getValue() - 1;
 
-    private long storedValue = 0;
-    private long maxValue = BASE_MAX_VALUE;
+    private final PiggyBankAccount account;
     private boolean silkTouched = false;
     private boolean contentsDropped = false;
 
     public PiggyBankBlockEntity(BlockPos pos, BlockState state) {
         super(NumismaticBlocks.PIGGY_BANK_BLOCK_ENTITY.get(), pos, state);
+        this.account = new PiggyBankAccount(BASE_MAX_VALUE);
     }
 
     protected PiggyBankBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state, long maxValue) {
         super(type, pos, state);
-        this.maxValue = maxValue;
+        this.account = new PiggyBankAccount(maxValue);
     }
 
     public long getStoredValue() {
-        return storedValue;
+        return account.getStored();
     }
 
     public long getMaxValue() {
-        return maxValue;
+        return account.getMaxValue();
     }
 
     public long getRemainingCapacity() {
-        return maxValue - storedValue;
+        return account.getRemainingCapacity();
     }
 
     public boolean isFull() {
-        return storedValue >= maxValue;
+        return account.isFull();
     }
 
     /**
      * Adds value to the piggy bank. Returns the amount actually added (may be less if capacity is reached).
      */
     public long addValue(long amount) {
-        if (amount <= 0) return 0;
-        long remaining = maxValue - storedValue;
-        long toAdd = Math.min(amount, remaining);
-        if (toAdd > 0) {
-            storedValue += toAdd;
-            setChanged();
-        }
-        return toAdd;
+        long added = account.add(amount);
+        if (added > 0) setChanged();
+        return added;
     }
 
     public boolean isEmpty() {
-        return storedValue == 0;
+        return account.isEmpty();
     }
 
     public boolean isSilkTouched() {
@@ -94,9 +89,7 @@ public class PiggyBankBlockEntity extends BlockEntity {
      * Returns a redstone signal (0-15) based on stored value relative to max capacity.
      */
     public int getRedstoneSignal() {
-        if (storedValue == 0) return 0;
-        if (storedValue >= maxValue) return 15;
-        return 1 + (int) (14.0 * storedValue / maxValue);
+        return account.getRedstoneSignal();
     }
 
     public Component getDisplayName() {
@@ -107,25 +100,25 @@ public class PiggyBankBlockEntity extends BlockEntity {
      * Returns a formatted string of the stored value.
      */
     public String getFormattedValue() {
-        return CurrencyResolver.formatValue(storedValue);
+        return CurrencyResolver.formatValue(account.getStored());
     }
 
     /**
      * Returns a formatted string of the max value.
      */
     public String getFormattedMaxValue() {
-        return CurrencyResolver.formatValue(maxValue);
+        return CurrencyResolver.formatValue(account.getMaxValue());
     }
 
     @Override
     protected void saveAdditional(CompoundTag tag) {
         super.saveAdditional(tag);
-        tag.putLong(TAG_VALUE, storedValue);
+        tag.putLong(TAG_VALUE, account.getStored());
     }
 
     @Override
     public void load(CompoundTag tag) {
         super.load(tag);
-        storedValue = tag.getLong(TAG_VALUE);
+        account.setStoredFromPersistence(tag.getLong(TAG_VALUE));
     }
 }

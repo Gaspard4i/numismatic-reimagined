@@ -11,6 +11,7 @@ architectury {
 subprojects {
     apply plugin: "dev.architectury.loom"
     apply plugin: "java"
+    apply plugin: "jacoco"
 
     loom {
         silentMojangMappingsLicense()
@@ -18,6 +19,10 @@ subprojects {
         runConfigs.configureEach {
             vmArgs "-Xmx4G", "-Xms1G"
         }
+    }
+
+    jacoco {
+        toolVersion = "0.8.11"
     }
 
     repositories {
@@ -53,7 +58,87 @@ subprojects {
 
     test {
         useJUnitPlatform()
+        finalizedBy(jacocoTestReport)
     }
+
+    // JaCoCo report excludes code that requires a running Minecraft client/server
+    // and cannot be unit-tested in JUnit (mixins, screens, registries,
+    // network handlers, block placement). These are validated via in-game
+    // testing checklists in STATUS.md.
+    // Files/patterns to exclude from JaCoCo coverage measurement.
+    // These are validated via in-game testing (see STATUS.md checklists)
+    // because they require a running Minecraft client/server context.
+    def jacocoExclusions = [
+                    // Screens / UI (require a Minecraft client)
+                    "dev/gaspard4i/numismatic/client/**",
+                    // Network handlers (require ServerPlayer / NetworkManager)
+                    "dev/gaspard4i/numismatic/network/**",
+                    // Architectury mixins (runtime-only)
+                    "dev/gaspard4i/numismatic/**/mixin/**",
+                    // Block / BlockEntity registration glue (DeferredRegister + RegistrySupplier)
+                    "**/Numismatic*.class",
+                    // Block subclasses (touchent Player/Level/BlockState).
+                    // PiggyBankAccount is pure logic and IS tested.
+                    "dev/gaspard4i/numismatic/block/PiggyBank*Block*.class",
+                    "dev/gaspard4i/numismatic/block/Golden*.class",
+                    "dev/gaspard4i/numismatic/block/Netherite*.class",
+                    "dev/gaspard4i/numismatic/block/Precious*.class",
+                    "dev/gaspard4i/numismatic/shop/ShopBlock*.class",
+                    "dev/gaspard4i/numismatic/shop/AdminShopBlock*.class",
+                    "dev/gaspard4i/numismatic/shop/ShopMenuOpener*.class",
+                    "dev/gaspard4i/numismatic/shop/ShopStockMenu*.class",
+                    // Logic depends on `instanceof CoinItem` / `MoneyBagItem` which
+                    // can't be instantiated in tests (registries frozen). Validated in-game.
+                    "dev/gaspard4i/numismatic/shop/ShopPaymentHelper*.class",
+                    // Thin wrapper around Player.hasPermissions; trivial.
+                    "dev/gaspard4i/numismatic/shop/PermissionHelper*.class",
+                    // Items (besoin Player + ItemStack vivant)
+                    "dev/gaspard4i/numismatic/item/CoinItem*.class",
+                    "dev/gaspard4i/numismatic/item/MoneyBagItem*.class",
+                    "dev/gaspard4i/numismatic/item/StarCoinItem*.class",
+                    "dev/gaspard4i/numismatic/item/PiggyBankBlockItem*.class",
+                    // Commands (touchent Brigadier + ServerPlayer)
+                    "dev/gaspard4i/numismatic/command/**",
+                    // Currency manager (SavedData = côté serveur, besoin ServerLevel)
+                    "dev/gaspard4i/numismatic/currency/PlayerCurrencyManager*.class",
+                    "dev/gaspard4i/numismatic/currency/CurrencyHelper*.class",
+                    // Events (Architectury event registration)
+                    "dev/gaspard4i/numismatic/event/**",
+                    // Platform abstractions
+                    "dev/gaspard4i/numismatic/platform/**",
+                    // Constants
+                    "dev/gaspard4i/numismatic/NumismaticConstants*.class",
+                    "dev/gaspard4i/numismatic/NumismaticReimagined*.class"
+    ]
+
+    jacocoTestReport {
+        dependsOn(test)
+        reports {
+            xml.required = true
+            html.required = true
+        }
+        afterEvaluate {
+            classDirectories.setFrom(files(classDirectories.files.collect {
+                fileTree(dir: it, exclude: jacocoExclusions)
+            }))
+        }
+    }
+
+    jacocoTestCoverageVerification {
+        dependsOn(test)
+        afterEvaluate {
+            classDirectories.setFrom(files(classDirectories.files.collect {
+                fileTree(dir: it, exclude: jacocoExclusions)
+            }))
+        }
+        violationRules {
+            rule {
+                limit { minimum = 0.96 }
+            }
+        }
+    }
+
+    check.dependsOn(jacocoTestCoverageVerification)
 }
 
 allprojects {
