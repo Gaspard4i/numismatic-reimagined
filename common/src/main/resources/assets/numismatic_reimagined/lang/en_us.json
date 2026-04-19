@@ -38,5 +38,12 @@
   "command.numismatic_reimagined.give_bag": "Gave a money bag worth %s",
 
   "block.numismatic_reimagined.shop_block": "Player Shop",
-  "block.numismatic_reimagined.admin_shop_block": "Admin Shop"
+  "block.numismatic_reimagined.admin_shop_block": "Admin Shop",
+
+  "gui.numismatic_reimagined.purse": "Purse",
+  "gui.numismatic_reimagined.purse.open": "$",
+  "gui.numismatic_reimagined.purse.extract": "Extract",
+  "gui.numismatic_reimagined.purse.extract_all": "Extract all (shift+ctrl)",
+
+  "key.numismatic_reimagined.open_purse": "Open purse"
 }

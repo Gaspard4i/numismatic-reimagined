@@ -2,6 +2,7 @@ package dev.gaspard4i.numismatic.fabric;
 
 import dev.gaspard4i.numismatic.NumismaticConstants;
 import dev.gaspard4i.numismatic.client.PurseHudOverlay;
+import dev.gaspard4i.numismatic.client.PurseInventoryHook;
 import dev.gaspard4i.numismatic.item.MoneyBagItem;
 import dev.gaspard4i.numismatic.item.NumismaticItems;
 import dev.gaspard4i.numismatic.network.ClientCurrencyData;
@@ -16,6 +17,9 @@ public class NumismaticReimaginedFabricClient implements ClientModInitializer {
     public void onInitializeClient() {
         // Register client-side packet receivers
         ClientCurrencyData.registerClientReceivers();
+
+        // Register purse button on inventory screen
+        PurseInventoryHook.register();
 
         // Register model predicate for money bag tiers
         ResourceLocation bagTierId = new ResourceLocation(NumismaticConstants.MOD_ID, "bag_tier");

@@ -38,5 +38,12 @@
   "command.numismatic_reimagined.give_bag": "Bourse donnée d'une valeur de %s",
 
   "block.numismatic_reimagined.shop_block": "Boutique de joueur",
-  "block.numismatic_reimagined.admin_shop_block": "Boutique admin"
+  "block.numismatic_reimagined.admin_shop_block": "Boutique admin",
+
+  "gui.numismatic_reimagined.purse": "Bourse",
+  "gui.numismatic_reimagined.purse.open": "$",
+  "gui.numismatic_reimagined.purse.extract": "Retirer",
+  "gui.numismatic_reimagined.purse.extract_all": "Tout retirer (shift+ctrl)",
+
+  "key.numismatic_reimagined.open_purse": "Ouvrir la bourse"
 }
