@@ -1,12 +1,12 @@
 package dev.gaspard4i.numismatic.fabric;
 
 import dev.gaspard4i.numismatic.NumismaticConstants;
+import dev.gaspard4i.numismatic.client.PurseHudOverlay;
 import dev.gaspard4i.numismatic.item.MoneyBagItem;
 import dev.gaspard4i.numismatic.item.NumismaticItems;
 import dev.gaspard4i.numismatic.network.ClientCurrencyData;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
-import dev.gaspard4i.numismatic.client.PurseHudOverlay;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.resources.ResourceLocation;
 
@@ -40,5 +40,6 @@ public class NumismaticReimaginedFabricClient implements ClientModInitializer {
         HudRenderCallback.EVENT.register((guiGraphics, tickDelta) ->
                 PurseHudOverlay.render(guiGraphics, tickDelta)
         );
+
     }
 }

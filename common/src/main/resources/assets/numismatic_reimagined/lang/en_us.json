@@ -16,6 +16,17 @@
   "tooltip.numismatic_reimagined.star_coin": "A legendary trophy coin",
   "tooltip.numismatic_reimagined.star_coin.desc": "Awarded for accumulating 1000 Netherite Coins",
 
+  "block.numismatic_reimagined.piggy_bank": "Piggy Bank",
+  "block.numismatic_reimagined.golden_piggy_bank": "Golden Piggy Bank",
+  "block.numismatic_reimagined.netherite_piggy_bank": "Netherite Piggy Bank",
+  "block.numismatic_reimagined.piggy_bank.empty": "This piggy bank is empty",
+  "block.numismatic_reimagined.piggy_bank.contains": "Contains: %s coins",
+  "block.numismatic_reimagined.piggy_bank.inserted": "+%s coins inserted",
+  "block.numismatic_reimagined.piggy_bank.full": "Piggy bank is full! (max %s)",
+  "block.numismatic_reimagined.piggy_bank.no_coins_in_inventory": "No coins or money bags in inventory",
+
+  "notification.numismatic_reimagined.collected": "+%s coins added to purse",
+
   "command.numismatic_reimagined.balance.self": "Your balance: %s",
   "command.numismatic_reimagined.balance.other": "%s's balance: %s",
   "command.numismatic_reimagined.deposit": "Deposited %s into your purse",

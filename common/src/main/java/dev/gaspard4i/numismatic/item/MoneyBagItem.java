@@ -1,13 +1,23 @@
 package dev.gaspard4i.numismatic.item;
 
+import dev.gaspard4i.numismatic.block.PiggyBankBlock;
+import dev.gaspard4i.numismatic.block.PiggyBankBlockEntity;
 import dev.gaspard4i.numismatic.currency.Currency;
 import dev.gaspard4i.numismatic.currency.CurrencyResolver;
+import dev.gaspard4i.numismatic.currency.PlayerCurrencyManager;
+import dev.gaspard4i.numismatic.network.NumismaticNetworking;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.inventory.ClickAction;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
@@ -76,10 +86,11 @@ public class MoneyBagItem extends Item {
     }
 
     /**
-     * Returns the tier as a float for model predicates (0.0, 1.0, 2.0, 3.0).
+     * Returns the tier as a normalized float for model predicates.
+     * Bronze=0.0, Silver=0.33, Gold=0.66, Netherite=1.0.
      */
     public static float getTierFloat(ItemStack stack) {
-        return getTier(getValue(stack));
+        return getTier(getValue(stack)) / 3.0f;
     }
 
     /**
@@ -98,29 +109,109 @@ public class MoneyBagItem extends Item {
     }
 
     @Override
+    public InteractionResult useOn(UseOnContext context) {
+        Level level = context.getLevel();
+        Player player = context.getPlayer();
+        if (player == null) return InteractionResult.PASS;
+
+        // Sneak + click on a piggy bank: route to the block's bulk-deposit handler
+        if (player.isShiftKeyDown() && level.getBlockState(context.getClickedPos()).getBlock() instanceof PiggyBankBlock) {
+            if (!level.isClientSide()) {
+                BlockEntity be = level.getBlockEntity(context.getClickedPos());
+                if (be instanceof PiggyBankBlockEntity piggyBank) {
+                    PiggyBankBlock.dumpInventoryIntoPiggyBank(player, piggyBank, level, context.getClickedPos());
+                }
+            }
+            return InteractionResult.sidedSuccess(level.isClientSide());
+        }
+        return InteractionResult.PASS;
+    }
+
+    @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand) {
         ItemStack stack = player.getItemInHand(usedHand);
 
         if (!level.isClientSide() && player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
             long value = getValue(stack);
+
+            // Always consume the bag, even if empty (e.g., creative bags with no value)
+            stack.shrink(1);
+
+            level.playSound(null, player.getX(), player.getY(), player.getZ(),
+                    net.minecraft.sounds.SoundEvents.EXPERIENCE_ORB_PICKUP,
+                    net.minecraft.sounds.SoundSource.PLAYERS,
+                    0.5f, 0.8f + level.getRandom().nextFloat() * 0.4f);
+
             if (value > 0) {
                 net.minecraft.server.level.ServerLevel overworld = serverPlayer.server.overworld();
-                dev.gaspard4i.numismatic.currency.PlayerCurrencyManager manager =
-                        dev.gaspard4i.numismatic.currency.PlayerCurrencyManager.get(overworld);
+                PlayerCurrencyManager manager = PlayerCurrencyManager.get(overworld);
                 manager.addBalance(serverPlayer.getUUID(), value);
 
-                stack.shrink(1);
+                // Show actionbar notification (total in coins)
+                serverPlayer.displayClientMessage(
+                        Component.translatable("notification.numismatic_reimagined.collected",
+                                String.format("%,d", value))
+                                .withStyle(ChatFormatting.GREEN), true);
 
-                level.playSound(null, player.getX(), player.getY(), player.getZ(),
-                        net.minecraft.sounds.SoundEvents.EXPERIENCE_ORB_PICKUP,
-                        net.minecraft.sounds.SoundSource.PLAYERS,
-                        0.5f, 0.8f + level.getRandom().nextFloat() * 0.4f);
-
-                dev.gaspard4i.numismatic.network.NumismaticNetworking.syncToClient(serverPlayer, manager);
+                NumismaticNetworking.syncToClient(serverPlayer, manager);
             }
         }
 
         return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
+    }
+
+    /**
+     * When this money bag is placed ON another item (right-click in inventory).
+     * Merges with coins or other money bags.
+     */
+    @Override
+    public boolean overrideStackedOnOther(ItemStack thisStack, Slot slot, ClickAction action, Player player) {
+        if (action != ClickAction.SECONDARY) return false;
+        ItemStack other = slot.getItem();
+        if (other.isEmpty()) return false;
+
+        long thisValue = getValue(thisStack);
+        long otherValue;
+
+        if (other.getItem() instanceof CoinItem otherCoin) {
+            otherValue = otherCoin.getStackValue(other);
+        } else if (other.getItem() instanceof MoneyBagItem) {
+            otherValue = getValue(other);
+        } else {
+            return false;
+        }
+
+        ItemStack bag = createWithValue(thisValue + otherValue);
+        slot.set(bag);
+        thisStack.shrink(1);
+        return true;
+    }
+
+    /**
+     * When another item is placed ON this money bag (right-click in inventory).
+     * Merges with coins or other money bags.
+     */
+    @Override
+    public boolean overrideOtherStackedOnMe(ItemStack thisStack, ItemStack other, Slot slot, ClickAction action,
+                                             Player player, SlotAccess access) {
+        if (action != ClickAction.SECONDARY) return false;
+        if (other.isEmpty()) return false;
+
+        long thisValue = getValue(thisStack);
+        long otherValue;
+
+        if (other.getItem() instanceof CoinItem otherCoin) {
+            otherValue = otherCoin.getStackValue(other);
+        } else if (other.getItem() instanceof MoneyBagItem) {
+            otherValue = getValue(other);
+        } else {
+            return false;
+        }
+
+        ItemStack bag = createWithValue(thisValue + otherValue);
+        slot.set(bag);
+        access.set(ItemStack.EMPTY);
+        return true;
     }
 
     @Override
@@ -139,13 +230,13 @@ public class MoneyBagItem extends Item {
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag isAdvanced) {
         long value = getValue(stack);
+        // Always show the value, even for empty bags (0 coins)
+        String totalFormatted = String.format("%,d coins", value);
+        tooltipComponents.add(
+                Component.translatable("tooltip.numismatic_reimagined.money_bag_value", totalFormatted)
+                        .withStyle(ChatFormatting.GOLD)
+        );
         if (value > 0) {
-            // Show total in bronze
-            String totalFormatted = String.format("%,d coins", value);
-            tooltipComponents.add(
-                    Component.translatable("tooltip.numismatic_reimagined.money_bag_value", totalFormatted)
-                            .withStyle(ChatFormatting.GOLD)
-            );
             // Show breakdown by denomination
             String detailed = CurrencyResolver.formatValue(value);
             tooltipComponents.add(

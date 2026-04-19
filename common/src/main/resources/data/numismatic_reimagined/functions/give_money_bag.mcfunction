@@ -1,8 +1,9 @@
-# Give money bags with various test values
-# Small bag (500 bronze = 5S)
+# Give money bags of each tier for testing
+# Bronze bag (50 bronze)
+give @s numismatic_reimagined:money_bag{Value:50L} 1
+# Silver bag (500 bronze = 5S)
 give @s numismatic_reimagined:money_bag{Value:500L} 1
-# Medium bag (50,000 bronze = 5G)
+# Gold bag (50,000 bronze = 5G)
 give @s numismatic_reimagined:money_bag{Value:50000L} 1
-# Large bag (1,000,000 bronze = 1N)
+# Netherite bag (1,000,000 bronze = 1N)
 give @s numismatic_reimagined:money_bag{Value:1000000L} 1
-# Random test: use /numismatic give_bag for a random amount

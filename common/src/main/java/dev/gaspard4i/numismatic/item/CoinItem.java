@@ -10,9 +10,17 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import dev.gaspard4i.numismatic.block.PiggyBankBlock;
+import dev.gaspard4i.numismatic.block.PiggyBankBlockEntity;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.entity.SlotAccess;
+import net.minecraft.world.inventory.ClickAction;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -42,6 +50,25 @@ public class CoinItem extends Item {
     }
 
     @Override
+    public InteractionResult useOn(UseOnContext context) {
+        Level level = context.getLevel();
+        Player player = context.getPlayer();
+        if (player == null) return InteractionResult.PASS;
+
+        // Sneak + click on a piggy bank: route to the block's bulk-deposit handler
+        if (player.isShiftKeyDown() && level.getBlockState(context.getClickedPos()).getBlock() instanceof PiggyBankBlock) {
+            if (!level.isClientSide()) {
+                BlockEntity be = level.getBlockEntity(context.getClickedPos());
+                if (be instanceof PiggyBankBlockEntity piggyBank) {
+                    PiggyBankBlock.dumpInventoryIntoPiggyBank(player, piggyBank, level, context.getClickedPos());
+                }
+            }
+            return InteractionResult.sidedSuccess(level.isClientSide());
+        }
+        return InteractionResult.PASS;
+    }
+
+    @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand) {
         ItemStack stack = player.getItemInHand(usedHand);
 
@@ -58,11 +85,78 @@ public class CoinItem extends Item {
                         SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.PLAYERS,
                         0.5f, 1.0f + level.getRandom().nextFloat() * 0.4f);
 
+                // Show actionbar notification (total in coins)
+                serverPlayer.displayClientMessage(
+                        Component.translatable("notification.numismatic_reimagined.collected",
+                                String.format("%,d", value))
+                                .withStyle(ChatFormatting.GREEN), true);
+
                 NumismaticNetworking.syncToClient(serverPlayer, manager);
             }
         }
 
         return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
+    }
+
+    /**
+     * When this coin stack is placed ON another item (right-click in inventory).
+     * Any coin/bag combination (same or different type) merges into a money bag.
+     */
+    @Override
+    public boolean overrideStackedOnOther(ItemStack thisStack, Slot slot, ClickAction action, Player player) {
+        if (action != ClickAction.SECONDARY) return false;
+        ItemStack other = slot.getItem();
+        if (other.isEmpty()) return false;
+
+        long thisValue = getStackValue(thisStack);
+        long otherValue;
+
+        if (other.getItem() instanceof CoinItem otherCoin) {
+            otherValue = otherCoin.getStackValue(other);
+        } else if (other.getItem() instanceof MoneyBagItem) {
+            otherValue = MoneyBagItem.getValue(other);
+        } else {
+            return false;
+        }
+
+        if (thisValue <= 0) return false;
+
+        ItemStack bag = MoneyBagItem.createWithValue(thisValue + otherValue);
+        slot.set(bag);
+        thisStack.shrink(thisStack.getCount());
+        return true;
+    }
+
+    /**
+     * When another item is placed ON this coin stack (right-click in inventory).
+     * Any coin/bag combination (same or different type) merges into a money bag.
+     */
+    @Override
+    public boolean overrideOtherStackedOnMe(ItemStack thisStack, ItemStack other, Slot slot, ClickAction action,
+                                             Player player, SlotAccess access) {
+        if (action != ClickAction.SECONDARY) return false;
+        if (other.isEmpty()) return false;
+
+        long thisValue = getStackValue(thisStack);
+        long otherValue;
+
+        if (other.getItem() instanceof CoinItem otherCoin) {
+            otherValue = otherCoin.getStackValue(other);
+        } else if (other.getItem() instanceof MoneyBagItem) {
+            otherValue = MoneyBagItem.getValue(other);
+        } else {
+            return false;
+        }
+
+        if (otherValue <= 0 && !(other.getItem() instanceof MoneyBagItem)) {
+            // Allow merging with empty money bags (they still count as mergeable)
+            if (thisValue <= 0) return false;
+        }
+
+        ItemStack bag = MoneyBagItem.createWithValue(thisValue + otherValue);
+        slot.set(bag);
+        access.set(ItemStack.EMPTY);
+        return true;
     }
 
     @Override

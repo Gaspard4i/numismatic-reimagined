@@ -5,7 +5,9 @@
   "minVersion": "0.8",
   "client": [],
   "mixins": [
-    "ContainerMixin"
+    "ContainerMixin",
+    "CreativeSlotPacketMixin",
+    "SlotMixin"
   ],
   "injectors": {
     "defaultRequire": 1

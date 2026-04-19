@@ -8,18 +8,18 @@
 - Notes : Build OK (common+fabric). Module Forge supprimé. Textures finales en place (MIT + recoloration netherite/star). Stack max 99 avec texture variants (5 seuils). JEI intégré. Fonctions mcfunction de test. Creative tab dédié. RAM réduite à 4G. MoneyBag non implémenté (reporté, complexité). En pause — prêt pour Phase 2.
 
 ## Phase 2 : Stockage de monnaie / Système Purse
-- [ ] Implémenté
+- [x] Implémenté
 - [ ] Tests unitaires (coverage: ?%)
 - [ ] Testé manuellement par l'utilisateur
 - [ ] Issues résolues
-- Notes : -
+- Notes : PlayerCurrencyManager (SavedData) + Networking S2C/C2S (NumismaticNetworking) + PurseHudOverlay + commandes /numismatic balance/deposit/withdraw/set/give/give_bag implémentés. Coins et MoneyBag se déposent au clic droit. Validation utilisateur en attente.
 
 ## Phase 3 : Piggy Bank
-- [ ] Implémenté
+- [x] Implémenté
 - [ ] Tests unitaires (coverage: ?%)
 - [ ] Testé manuellement par l'utilisateur
 - [ ] Issues résolues
-- Notes : -
+- Notes : 3 variantes (base/golden/netherite) avec capacités max-1 (9999B / 999999B / 999999999B). Clic droit = insère 1 unité avec rendu du change en money bag. Shift-clic = dépose tout l'inventaire. Silk touch préserve les contenus. Recettes craft. Stack à 99 via mixin Slot. Bug créatif → inventaire en cours de validation.
 
 ## Phase 4 : Shop Block (redesigné)
 - [ ] Implémenté

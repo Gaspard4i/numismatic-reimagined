@@ -4,6 +4,7 @@ import dev.architectury.registry.CreativeTabRegistry;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
 import dev.gaspard4i.numismatic.NumismaticConstants;
+import dev.gaspard4i.numismatic.block.NumismaticBlocks;
 import dev.gaspard4i.numismatic.currency.Currency;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -50,7 +51,10 @@ public final class NumismaticItems {
                         output.accept(new ItemStack(GOLD_COIN.get()));
                         output.accept(new ItemStack(NETHERITE_COIN.get()));
                         output.accept(new ItemStack(STAR_COIN.get()));
-                        output.accept(new ItemStack(MONEY_BAG.get()));
+                        output.accept(MoneyBagItem.createWithValue(0));
+                        output.accept(new ItemStack(NumismaticBlocks.PIGGY_BANK_ITEM.get()));
+                        output.accept(new ItemStack(NumismaticBlocks.GOLDEN_PIGGY_BANK_ITEM.get()));
+                        output.accept(new ItemStack(NumismaticBlocks.NETHERITE_PIGGY_BANK_ITEM.get()));
                     })
             )
     );

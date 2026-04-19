@@ -1,12 +1,15 @@
 package dev.gaspard4i.numismatic.currency;
 
 import dev.gaspard4i.numismatic.item.CoinItem;
+import dev.gaspard4i.numismatic.item.MoneyBagItem;
 import dev.gaspard4i.numismatic.item.NumismaticItems;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 
 import java.util.Map;
 
@@ -121,7 +124,38 @@ public final class CurrencyHelper {
     }
 
     /**
-     * Deposits all coins from the player's inventory into their purse.
+     * Drops a value as optimally-denominated coin stacks at the given position.
+     * Splits the value into the highest denominations possible, stacked to 64.
+     */
+    public static void dropAsCoins(Level level, BlockPos pos, long bronzeValue) {
+        if (bronzeValue <= 0 || level.isClientSide()) return;
+
+        Map<Currency, Long> split = CurrencyResolver.splitValue(bronzeValue);
+
+        for (Map.Entry<Currency, Long> entry : split.entrySet()) {
+            long count = entry.getValue();
+            if (count <= 0) continue;
+
+            Item coinItem = NumismaticItems.getCoinItem(entry.getKey());
+            if (coinItem == null) continue;
+
+            while (count > 0) {
+                int stackSize = (int) Math.min(count, coinItem.getMaxStackSize());
+                ItemStack coinStack = new ItemStack(coinItem, stackSize);
+                double dx = level.getRandom().nextDouble() * 0.7 + 0.15;
+                double dy = level.getRandom().nextDouble() * 0.7 + 0.15;
+                double dz = level.getRandom().nextDouble() * 0.7 + 0.15;
+                ItemEntity entity = new ItemEntity(level,
+                        pos.getX() + dx, pos.getY() + dy, pos.getZ() + dz, coinStack);
+                entity.setDefaultPickUpDelay();
+                level.addFreshEntity(entity);
+                count -= stackSize;
+            }
+        }
+    }
+
+    /**
+     * Deposits all coins AND money bags from the player's inventory into their purse.
      *
      * @param player the player
      * @param manager the currency manager
@@ -135,6 +169,10 @@ public final class CurrencyHelper {
             ItemStack stack = inventory.getItem(i);
             if (stack.getItem() instanceof CoinItem coinItem) {
                 long value = coinItem.getStackValue(stack);
+                totalDeposited += value;
+                inventory.setItem(i, ItemStack.EMPTY);
+            } else if (stack.getItem() instanceof MoneyBagItem) {
+                long value = MoneyBagItem.getValue(stack);
                 totalDeposited += value;
                 inventory.setItem(i, ItemStack.EMPTY);
             }

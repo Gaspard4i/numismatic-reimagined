@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "NPN",
+    "NCN",
+    "NNN"
+  ],
+  "key": {
+    "N": { "item": "minecraft:netherite_ingot" },
+    "P": { "item": "minecraft:porkchop" },
+    "C": { "item": "minecraft:chest" }
+  },
+  "result": {
+    "item": "numismatic_reimagined:netherite_piggy_bank",
+    "count": 1
+  }
+}
