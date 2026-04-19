@@ -1,5 +1,5 @@
 <p align="center">
-  <img src=".github/assets/logo.png" alt="Numismatic Reimagined" width="180" />
+  <img src=".github/assets/social-preview.png" alt="Numismatic Reimagined" width="500" />
 </p>
 
 # Numismatic Reimagined
