@@ -1,6 +1,7 @@
 plugins {
     id("dev.architectury.loom")
     id("architectury-plugin")
+    id("com.gradleup.shadow") version "8.3.5"
     id("jacoco")
 }
 
@@ -29,6 +30,10 @@ dependencies {
 
     "neoForge"("net.neoforged:neoforge:$neoforgeVersion")
     modImplementation("dev.architectury:architectury-neoforge:$architecturyApiVersion")
+
+    // Dev-only runtime mods for easier testing (JEI, Jade).
+    modRuntimeOnly("mezz.jei:jei-1.21.1-neoforge:${property("jei_version")}")
+    modRuntimeOnly("maven.modrinth:jade:${property("jade_version_neoforge")}@jar")
 }
 
 val common: Configuration by configurations.creating
@@ -44,6 +49,7 @@ dependencies {
     shadowCommon(project(path = ":common", configuration = "transformProductionNeoForge")) { isTransitive = false }
 }
 
+
 sourceSets.main {
     resources.srcDir(project(":common").file("src/main/resources"))
 }
@@ -53,5 +59,31 @@ tasks.processResources {
     filesMatching("META-INF/neoforge.mods.toml") {
         expand("version" to project.version)
     }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    // Exclude the Fabric manifest from the NeoForge jar.
+    exclude("fabric.mod.json")
+}
+
+tasks.shadowJar {
+    exclude("fabric.mod.json")
+    exclude("architectury.common.json")
+    configurations = listOf(shadowCommon)
+    archiveClassifier.set("dev-shadow")
+}
+
+tasks.remapJar {
+    inputFile.set(tasks.shadowJar.flatMap { it.archiveFile })
+    dependsOn(tasks.shadowJar)
+    archiveClassifier.set(null as String?)
+}
+
+tasks.jar {
+    archiveClassifier.set("dev")
+}
+
+tasks.sourcesJar {
+    val commonSources = project(":common").tasks.named<org.gradle.jvm.tasks.Jar>("sourcesJar")
+    dependsOn(commonSources)
+    from(commonSources.map { zipTree(it.archiveFile) })
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }

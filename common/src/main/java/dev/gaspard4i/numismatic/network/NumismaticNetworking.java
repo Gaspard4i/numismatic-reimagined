@@ -42,14 +42,12 @@ public final class NumismaticNetworking {
     }
 
     public static void register() {
-        NetworkManager.registerS2CPayloadType(SYNC_BALANCE, SyncBalancePayload.CODEC);
         NetworkManager.registerReceiver(
                 NetworkManager.Side.S2C,
                 SYNC_BALANCE,
                 SyncBalancePayload.CODEC,
                 (payload, ctx) -> ClientCurrencyData.setBalance(payload.balance())
         );
-
         NetworkManager.registerReceiver(
                 NetworkManager.Side.C2S,
                 WITHDRAW,

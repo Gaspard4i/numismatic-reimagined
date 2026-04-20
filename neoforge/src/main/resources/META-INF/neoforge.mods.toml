@@ -27,7 +27,7 @@ ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.numismatic_reimagined]]
-modId = "architectury_api"
+modId = "architectury"
 type = "required"
 versionRange = "[13.0.0,)"
 ordering = "AFTER"

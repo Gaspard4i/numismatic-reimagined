@@ -24,6 +24,17 @@ subprojects {
         maven("https://maven.parchmentmc.org")
         maven("https://maven.wispforest.io")
         maven("https://maven.neoforged.net/releases/")
+        maven("https://maven.blamejared.com") { name = "BlameJared (JEI)" }
+        maven("https://modmaven.dev") { name = "ModMaven (JEI mirror)" }
+        exclusiveContent {
+            forRepository {
+                maven("https://api.modrinth.com/maven") {
+                    name = "Modrinth"
+                    metadataSources { artifact() }
+                }
+            }
+            filter { includeGroup("maven.modrinth") }
+        }
     }
 
     java {
