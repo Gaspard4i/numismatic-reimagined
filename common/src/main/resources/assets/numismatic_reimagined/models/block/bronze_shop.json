@@ -1,3 +1,7 @@
 {
-  "parent": "numismatic_reimagined:block/shop_block"
+  "parent": "numismatic_reimagined:block/shop_block",
+  "textures": {
+    "0": "numismatic_reimagined:block/bronze_shop_top",
+    "1": "numismatic_reimagined:block/bronze_shop_side"
+  }
 }
