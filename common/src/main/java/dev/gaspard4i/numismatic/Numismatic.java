@@ -19,5 +19,8 @@ public final class Numismatic {
         dev.gaspard4i.numismatic.item.NumismaticItems.register();
         dev.gaspard4i.numismatic.item.NumismaticCreativeTab.register();
         dev.gaspard4i.numismatic.network.NumismaticNetworking.register();
+        dev.gaspard4i.numismatic.loot.MobDropEvents.register();
+        dev.gaspard4i.numismatic.villager.NumismaticTrades.register();
+        dev.gaspard4i.numismatic.command.NumismaticCommands.register();
     }
 }
