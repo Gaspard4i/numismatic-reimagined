@@ -46,6 +46,7 @@
   "tooltip.numismatic_reimagined.money_bag.empty": "Bourse vide",
   "advancement.numismatic_reimagined.star_coin.title": "Collectionneur d'étoiles",
   "advancement.numismatic_reimagined.star_coin.description": "Accumule 1000 Netherite Coins pour gagner la Star Coin légendaire.",
+  "key.numismatic_reimagined.open_purse": "Ouvrir la bourse",
 
   "gui.numismatic_reimagined.purse": "Bourse",
   "gui.numismatic_reimagined.purse.open": "$",

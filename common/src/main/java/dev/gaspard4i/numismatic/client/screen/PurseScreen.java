@@ -1,6 +1,7 @@
 package dev.gaspard4i.numismatic.client.screen;
 
 import dev.gaspard4i.numismatic.NumismaticConstants;
+import dev.gaspard4i.numismatic.client.PurseExtractLogic;
 import dev.gaspard4i.numismatic.currency.Currency;
 import dev.gaspard4i.numismatic.item.NumismaticItems;
 import dev.gaspard4i.numismatic.network.ClientCurrencyData;
@@ -91,23 +92,14 @@ public class PurseScreen extends Screen {
     }
 
     private void pend(Currency c, int delta) {
-        int idx = c.ordinal();
-        long step = hasShiftDown() ? 10 : 1;
-        long newVal = pending[idx] + delta * step;
-        if (newVal < 0) newVal = 0;
-
-        // Cap at the player's balance for that denomination.
-        long max = ClientCurrencyData.getBalance() / c.getValue();
-        if (newVal > max) newVal = max;
-        pending[idx] = newVal;
+        boolean shift = hasShiftDown();
+        long balance = ClientCurrencyData.getBalance();
+        if (delta > 0) PurseExtractLogic.increment(pending, c, balance, shift);
+        else PurseExtractLogic.decrement(pending, c, shift);
     }
 
     private long totalPending() {
-        long total = 0;
-        for (Currency c : Currency.values()) {
-            total += pending[c.ordinal()] * c.getValue();
-        }
-        return total;
+        return PurseExtractLogic.totalPending(pending);
     }
 
     private void onExtract() {

@@ -46,6 +46,7 @@
   "tooltip.numismatic_reimagined.money_bag.empty": "Empty money bag",
   "advancement.numismatic_reimagined.star_coin.title": "Star Collector",
   "advancement.numismatic_reimagined.star_coin.description": "Accumulate 1000 Netherite Coins to earn the legendary Star Coin.",
+  "key.numismatic_reimagined.open_purse": "Open Purse",
 
   "gui.numismatic_reimagined.purse": "Purse",
   "gui.numismatic_reimagined.purse.open": "$",

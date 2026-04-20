@@ -1,12 +1,18 @@
 package dev.gaspard4i.numismatic.forge;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import dev.architectury.registry.menu.MenuRegistry;
 import dev.gaspard4i.numismatic.NumismaticConstants;
 import dev.gaspard4i.numismatic.client.PurseHudOverlay;
+import dev.gaspard4i.numismatic.client.PurseKeybindState;
 import dev.gaspard4i.numismatic.client.screen.ShopScreen;
 import dev.gaspard4i.numismatic.client.tooltip.CurrencyTooltipComponent;
 import dev.gaspard4i.numismatic.client.tooltip.CurrencyTooltipData;
+import net.minecraft.client.KeyMapping;
 import net.minecraftforge.client.event.RegisterClientTooltipComponentFactoriesEvent;
+import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
+import net.minecraftforge.client.event.InputEvent;
+import net.minecraftforge.client.settings.KeyConflictContext;
 import dev.gaspard4i.numismatic.item.MoneyBagItem;
 import dev.gaspard4i.numismatic.item.NumismaticItems;
 import dev.gaspard4i.numismatic.network.ClientCurrencyData;
@@ -44,12 +50,30 @@ public class NumismaticReimaginedForgeClient {
         event.register(CurrencyTooltipData.class, CurrencyTooltipComponent::new);
     }
 
+    public static final KeyMapping OPEN_PURSE_KEY = new KeyMapping(
+            "key.numismatic_reimagined.open_purse",
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_P),
+            "key.categories.inventory");
+
+    @SubscribeEvent
+    public static void onRegisterKeys(RegisterKeyMappingsEvent event) {
+        event.register(OPEN_PURSE_KEY);
+    }
+
     @Mod.EventBusSubscriber(modid = NumismaticConstants.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
     public static class ForgeOverlayEvents {
         @SubscribeEvent
         public static void onRenderOverlay(RenderGuiOverlayEvent.Post event) {
             if (event.getOverlay() == VanillaGuiOverlay.HOTBAR.type()) {
                 PurseHudOverlay.render(event.getGuiGraphics(), event.getPartialTick());
+            }
+        }
+
+        @SubscribeEvent
+        public static void onKeyInput(InputEvent.Key event) {
+            while (OPEN_PURSE_KEY.consumeClick()) {
+                PurseKeybindState.openPurseScreen();
             }
         }
     }
