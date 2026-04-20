@@ -11,19 +11,22 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Container menu for the shop. 27 stock slots are hidden in tab=1 (offers)
- * via {@link AutoHidingSlot}. Matches the layout and slot coordinates of
- * wisp-forest/numismatic-overhaul/ShopScreenHandler.
+ * Container menu for the shop. Stock size is now driven by the tier
+ * ({@link ShopTier#stockSize()}), 9..36 slots arranged as N rows of 9.
+ *
+ * <p>Stock slots are hidden when the client's {@code ShopScreen} is on the
+ * offers tab (tab=1), via {@link AutoHidingSlot}.
  */
 public class ShopMenu extends AbstractContainerMenu {
 
-    public static final int STOCK_ROWS = 3;
     public static final int STOCK_COLS = 9;
-    public static final int STOCK_SIZE = STOCK_ROWS * STOCK_COLS;
+    /** Legacy constant — prefer {@link #stockSize()} on an instance. */
+    public static final int STOCK_SIZE = 27;
 
     @Nullable
     private final ShopBlockEntity shop;
     private final Container stockContainer;
+    private final int stockSize;
 
     public ShopMenu(int containerId, Inventory playerInv) {
         this(containerId, playerInv, null);
@@ -32,29 +35,38 @@ public class ShopMenu extends AbstractContainerMenu {
     public ShopMenu(int containerId, Inventory playerInv, @Nullable ShopBlockEntity shop) {
         super(ShopRegistry.SHOP_MENU.get(), containerId);
         this.shop = shop;
-        this.stockContainer = shop != null ? new BackedContainer(shop) : new SimpleContainer(STOCK_SIZE);
+        int size = shop != null ? shop.getContainerSize() : STOCK_SIZE;
+        this.stockSize = size;
+        this.stockContainer = shop != null ? new BackedContainer(shop, size) : new SimpleContainer(size);
 
-        // Stock 9x3 — first slot at (8, 18). One pixel below shop.xml's
-        // original y=17 so items sit inside the cell instead of overlapping
-        // the top border drawn in shop_gui.png.
-        for (int row = 0; row < STOCK_ROWS; row++) {
-            for (int col = 0; col < STOCK_COLS; col++) {
-                int index = col + row * STOCK_COLS;
+        int rows = Math.max(1, size / STOCK_COLS);
+        int cols = STOCK_COLS;
+
+        // Stock grid : rows×9, starting at (8, 18).
+        for (int row = 0; row < rows; row++) {
+            for (int col = 0; col < cols; col++) {
+                int index = col + row * cols;
                 addSlot(new AutoHidingSlot(stockContainer, index, 8 + col * 18, 18 + row * 18));
             }
         }
-        // Player inventory at (8, 86) + hotbar at (8, 144) — offset by +1 too.
+        // Player inventory + hotbar below the stock grid. The vanilla chest
+        // layout reserves 18 px per row, so the inventory simply starts after
+        // the last stock row + small gap (+11 pixels to match shop.xml's
+        // inventoryLabelY=75 when rows=3).
+        int invY = 18 + rows * 18 + 14;
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
-                addSlot(new Slot(playerInv, col + row * 9 + 9, 8 + col * 18, 86 + row * 18));
+                addSlot(new Slot(playerInv, col + row * 9 + 9, 8 + col * 18, invY + row * 18));
             }
         }
         for (int col = 0; col < 9; col++) {
-            addSlot(new Slot(playerInv, col, 8 + col * 18, 144));
+            addSlot(new Slot(playerInv, col, 8 + col * 18, invY + 58));
         }
     }
 
     @Nullable public ShopBlockEntity getShop() { return shop; }
+
+    public int stockSize() { return stockSize; }
 
     @Override
     public ItemStack quickMoveStack(Player player, int index) {
@@ -63,10 +75,10 @@ public class ShopMenu extends AbstractContainerMenu {
         if (!slot.hasItem()) return ret;
         ItemStack stack = slot.getItem();
         ret = stack.copy();
-        if (index < STOCK_SIZE) {
-            if (!moveItemStackTo(stack, STOCK_SIZE, this.slots.size(), true)) return ItemStack.EMPTY;
+        if (index < stockSize) {
+            if (!moveItemStackTo(stack, stockSize, this.slots.size(), true)) return ItemStack.EMPTY;
         } else {
-            if (!moveItemStackTo(stack, 0, STOCK_SIZE, false)) return ItemStack.EMPTY;
+            if (!moveItemStackTo(stack, 0, stockSize, false)) return ItemStack.EMPTY;
         }
         if (stack.isEmpty()) slot.set(ItemStack.EMPTY);
         else slot.setChanged();
@@ -103,8 +115,8 @@ public class ShopMenu extends AbstractContainerMenu {
     private static final class BackedContainer extends SimpleContainer {
         private final ShopBlockEntity shop;
 
-        BackedContainer(ShopBlockEntity shop) {
-            super(STOCK_SIZE);
+        BackedContainer(ShopBlockEntity shop, int size) {
+            super(size);
             this.shop = shop;
         }
 

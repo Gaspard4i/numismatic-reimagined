@@ -10,17 +10,35 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Bounded list of {@link ShopOffer} entries (max 56 in this build).
+ * Bounded list of {@link ShopOffer} entries. The hard cap is {@link #ABSOLUTE_MAX}
+ * but a smaller {@code softMax} can be passed in to enforce a per-tier cap
+ * (bronze shop = 3, silver = 6, etc.). Persistence never loses entries:
+ * {@link #fromTag} preserves existing offers up to {@code ABSOLUTE_MAX},
+ * so shrinking the cap (e.g. admin → bronze) cannot silently drop data.
  */
 public class OfferList {
 
-    public static final int MAX_OFFERS = 56;
+    /** Absolute safety cap. Equal to the ADMIN tier's offer limit. */
+    public static final int ABSOLUTE_MAX = 56;
+    /** Backwards-compatible alias — new code should call {@link #getSoftMax()}. */
+    public static final int MAX_OFFERS = ABSOLUTE_MAX;
     private static final String TAG_OFFERS = "Offers";
 
     private final List<ShopOffer> offers = new ArrayList<>();
+    private int softMax;
+
+    public OfferList() { this(ABSOLUTE_MAX); }
+    public OfferList(int softMax) {
+        this.softMax = Math.max(1, Math.min(softMax, ABSOLUTE_MAX));
+    }
+
+    public int getSoftMax() { return softMax; }
+    public void setSoftMax(int newMax) {
+        this.softMax = Math.max(1, Math.min(newMax, ABSOLUTE_MAX));
+    }
 
     public int size() { return offers.size(); }
-    public boolean isFull() { return offers.size() >= MAX_OFFERS; }
+    public boolean isFull() { return offers.size() >= softMax; }
     public boolean isEmpty() { return offers.isEmpty(); }
 
     @Nullable
@@ -62,10 +80,14 @@ public class OfferList {
     }
 
     public static OfferList fromTag(CompoundTag tag) {
-        OfferList list = new OfferList();
+        return fromTag(tag, ABSOLUTE_MAX);
+    }
+
+    public static OfferList fromTag(CompoundTag tag, int softMax) {
+        OfferList list = new OfferList(softMax);
         if (!tag.contains(TAG_OFFERS, Tag.TAG_LIST)) return list;
         ListTag offers = tag.getList(TAG_OFFERS, Tag.TAG_COMPOUND);
-        for (int i = 0; i < offers.size() && list.size() < MAX_OFFERS; i++) {
+        for (int i = 0; i < offers.size() && list.offers.size() < ABSOLUTE_MAX; i++) {
             try {
                 list.offers.add(ShopOffer.fromTag(offers.getCompound(i)));
             } catch (IllegalArgumentException ignored) {}

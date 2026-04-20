@@ -37,8 +37,13 @@
   "command.numismatic_reimagined.give": "%s donné(s) à %s",
   "command.numismatic_reimagined.give_bag": "Bourse donnée d'une valeur de %s",
 
-  "block.numismatic_reimagined.shop_block": "Boutique de joueur",
+  "block.numismatic_reimagined.shop_block": "Boutique d'or",
   "block.numismatic_reimagined.admin_shop_block": "Boutique admin",
+  "block.numismatic_reimagined.bronze_shop": "Boutique de bronze",
+  "block.numismatic_reimagined.silver_shop": "Boutique d'argent",
+  "block.numismatic_reimagined.netherite_shop": "Boutique de netherite",
+  "gui.numismatic_reimagined.shop.transfer_tooltip": "Entrée hopper (offres whitelist)",
+  "tooltip.numismatic_reimagined.money_bag.empty": "Bourse vide",
 
   "gui.numismatic_reimagined.purse": "Bourse",
   "gui.numismatic_reimagined.purse.open": "$",

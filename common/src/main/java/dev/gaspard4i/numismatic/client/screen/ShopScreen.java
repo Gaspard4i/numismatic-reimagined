@@ -100,9 +100,12 @@ public class ShopScreen extends AbstractContainerScreen<ShopMenu> {
     public ShopScreen(ShopMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
         this.imageWidth = BG_W;
-        this.imageHeight = BG_H;
+        // Base panel is 168 px tall (3 stock rows + inventory). Extra rows
+        // push the inventory down by 18 px each.
+        int extraRows = Math.max(0, (menu.stockSize() / 9) - 3);
+        this.imageHeight = BG_H + extraRows * 18;
         this.titleLabelY = 5;
-        this.inventoryLabelY = 75;
+        this.inventoryLabelY = this.imageHeight - 94;
     }
 
     public int currentTab() { return tab; }
@@ -286,7 +289,23 @@ public class ShopScreen extends AbstractContainerScreen<ShopMenu> {
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
 
         ResourceLocation bg = tab == 1 ? TRADES_TEXTURE : TEXTURE_PNG;
-        g.blit(bg, leftPos, topPos, 0, 0, BG_W, BG_H);
+
+        int extraRows = (imageHeight - BG_H) / 18;
+        if (extraRows <= 0) {
+            g.blit(bg, leftPos, topPos, 0, 0, BG_W, BG_H);
+        } else {
+            // Top of the background: header + 3 stock rows (= 71 px).
+            int topPart = 71;
+            g.blit(bg, leftPos, topPos, 0, 0, BG_W, topPart);
+            // Duplicate the last stock row to cover the extra rows.
+            int rowSrcY = topPart - 18; // y=53 in the PNG = last-row top
+            for (int i = 0; i < extraRows; i++) {
+                g.blit(bg, leftPos, topPos + topPart + i * 18, 0, rowSrcY, BG_W, 18);
+            }
+            // Bottom of the background: player inventory strip (y=71..168 in the PNG).
+            g.blit(bg, leftPos, topPos + topPart + extraRows * 18,
+                    0, topPart, BG_W, BG_H - topPart);
+        }
 
         int px = leftPos + CUR_X_OFFSET;
 

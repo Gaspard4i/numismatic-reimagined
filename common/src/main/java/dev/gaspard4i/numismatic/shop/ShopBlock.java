@@ -40,10 +40,19 @@ public class ShopBlock extends BaseEntityBlock {
     // air above the block.
     private static final VoxelShape SHAPE = Block.box(0, 0, 0, 16, 12, 16);
 
+    private final ShopTier tier;
+
     public ShopBlock(Properties properties) {
+        this(properties, ShopTier.GOLD);
+    }
+
+    public ShopBlock(Properties properties, ShopTier tier) {
         super(properties);
+        this.tier = tier;
         registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH));
     }
+
+    public ShopTier tier() { return tier; }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
@@ -76,9 +85,9 @@ public class ShopBlock extends BaseEntityBlock {
         return state.rotate(mirror.getRotation(state.getValue(FACING)));
     }
 
-    /** True for {@link AdminShopBlock}; subclasses override. */
+    /** True when the tier is {@link ShopTier#ADMIN}. */
     public boolean isAdminVariant() {
-        return false;
+        return tier.isAdmin();
     }
 
     @Override

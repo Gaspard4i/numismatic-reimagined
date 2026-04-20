@@ -30,6 +30,8 @@ import java.util.stream.IntStream;
  */
 public class ShopBlockEntity extends RandomizableContainerBlockEntity implements WorldlyContainer {
 
+    /** Legacy constant kept for callers that do not know the tier yet.
+     *  New code should call {@link #getContainerSize()} on the instance. */
     public static final int STOCK_SIZE = 27;
 
     private static final String TAG_OWNER = "Owner";
@@ -37,24 +39,39 @@ public class ShopBlockEntity extends RandomizableContainerBlockEntity implements
     private static final String TAG_OFFERS = "OfferList";
     private static final String TAG_REVENUE = "Revenue";
     private static final String TAG_ALLOWS_TRANSFER = "AllowsTransfer";
+    private static final String TAG_TIER = "Tier";
 
-    private NonNullList<ItemStack> items = NonNullList.withSize(STOCK_SIZE, ItemStack.EMPTY);
+    private ShopTier tier;
+    private NonNullList<ItemStack> items;
     @Nullable
     private UUID owner;
     private boolean isAdmin = false;
     private boolean allowsTransfer = false;
-    private OfferList offers = new OfferList();
+    private OfferList offers;
     private long accumulatedRevenue = 0;
 
     public ShopBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
+        // Default tier is determined by the block hosting this BE. If the
+        // block implements TierProvider, use it; otherwise fall back to GOLD
+        // (legacy shops that pre-date the tier system).
+        ShopTier resolved = ShopTier.GOLD;
+        if (state != null && state.getBlock() instanceof ShopBlock sb) {
+            resolved = sb.tier();
+        }
+        this.tier = resolved;
+        this.isAdmin = resolved.isAdmin();
+        this.items = NonNullList.withSize(resolved.stockSize(), ItemStack.EMPTY);
+        this.offers = new OfferList(resolved.maxOffers());
     }
+
+    public ShopTier getTier() { return tier; }
 
     // --- Container ---
 
     @Override
     public int getContainerSize() {
-        return STOCK_SIZE;
+        return items.size();
     }
 
     @Override
@@ -125,7 +142,7 @@ public class ShopBlockEntity extends RandomizableContainerBlockEntity implements
 
     @Override
     public int[] getSlotsForFace(Direction side) {
-        return allowsTransfer ? IntStream.range(0, STOCK_SIZE).toArray() : new int[0];
+        return allowsTransfer ? IntStream.range(0, items.size()).toArray() : new int[0];
     }
 
     @Override
@@ -230,6 +247,7 @@ public class ShopBlockEntity extends RandomizableContainerBlockEntity implements
         if (owner != null) tag.putUUID(TAG_OWNER, owner);
         tag.putBoolean(TAG_IS_ADMIN, isAdmin);
         tag.putBoolean(TAG_ALLOWS_TRANSFER, allowsTransfer);
+        tag.putString(TAG_TIER, tier.id());
         tag.put(TAG_OFFERS, offers.toTag());
         tag.putLong(TAG_REVENUE, accumulatedRevenue);
     }
@@ -237,14 +255,22 @@ public class ShopBlockEntity extends RandomizableContainerBlockEntity implements
     @Override
     public void load(CompoundTag tag) {
         super.load(tag);
-        this.items = NonNullList.withSize(STOCK_SIZE, ItemStack.EMPTY);
+        // Tier resolution: saved tag → enum; legacy shops with no tag
+        // default to GOLD (preserves 27-slot behaviour from pre-tiers saves).
+        if (tag.contains(TAG_TIER)) {
+            String id = tag.getString(TAG_TIER);
+            for (ShopTier t : ShopTier.values()) {
+                if (t.id().equals(id)) { this.tier = t; break; }
+            }
+        }
+        this.items = NonNullList.withSize(tier.stockSize(), ItemStack.EMPTY);
         if (!this.tryLoadLootTable(tag)) {
             ContainerHelper.loadAllItems(tag, this.items);
         }
         owner = tag.hasUUID(TAG_OWNER) ? tag.getUUID(TAG_OWNER) : null;
         isAdmin = tag.getBoolean(TAG_IS_ADMIN);
         allowsTransfer = tag.getBoolean(TAG_ALLOWS_TRANSFER);
-        offers = OfferList.fromTag(tag.getCompound(TAG_OFFERS));
+        offers = OfferList.fromTag(tag.getCompound(TAG_OFFERS), tier.maxOffers());
         accumulatedRevenue = tag.getLong(TAG_REVENUE);
     }
 }

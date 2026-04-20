@@ -37,8 +37,13 @@
   "command.numismatic_reimagined.give": "Gave %s to %s",
   "command.numismatic_reimagined.give_bag": "Gave a money bag worth %s",
 
-  "block.numismatic_reimagined.shop_block": "Player Shop",
+  "block.numismatic_reimagined.shop_block": "Gold Shop",
   "block.numismatic_reimagined.admin_shop_block": "Admin Shop",
+  "block.numismatic_reimagined.bronze_shop": "Bronze Shop",
+  "block.numismatic_reimagined.silver_shop": "Silver Shop",
+  "block.numismatic_reimagined.netherite_shop": "Netherite Shop",
+  "gui.numismatic_reimagined.shop.transfer_tooltip": "Toggle hopper input (offer whitelist)",
+  "tooltip.numismatic_reimagined.money_bag.empty": "Empty money bag",
 
   "gui.numismatic_reimagined.purse": "Purse",
   "gui.numismatic_reimagined.purse.open": "$",
