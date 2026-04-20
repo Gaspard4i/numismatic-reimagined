@@ -28,11 +28,12 @@ public final class ClientCurrencyData {
                     BlockPos pos = buf.readBlockPos();
                     boolean canEdit = buf.readBoolean();
                     boolean isAdmin = buf.readBoolean();
+                    boolean allowsTransfer = buf.readBoolean();
                     CompoundTag offersTag = buf.readNbt();
                     long revenue = buf.readLong();
                     OfferList offers = offersTag != null ? OfferList.fromTag(offersTag) : new OfferList();
                     ctx.queue(() -> {
-                        ClientShopState.update(pos, canEdit, isAdmin, offers, revenue);
+                        ClientShopState.update(pos, canEdit, isAdmin, offers, revenue, allowsTransfer);
                         Minecraft mc = Minecraft.getInstance();
                         if (mc.screen instanceof ShopScreen shop) {
                             shop.refreshAfterStateSync();

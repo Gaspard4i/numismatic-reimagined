@@ -31,6 +31,7 @@ public final class NumismaticNetworking {
     public static final ResourceLocation REMOVE_OFFER_C2S = id("remove_offer");
     public static final ResourceLocation PURCHASE_OFFER_C2S = id("purchase_offer");
     public static final ResourceLocation WITHDRAW_REVENUE_C2S = id("withdraw_revenue");
+    public static final ResourceLocation TOGGLE_TRANSFER_C2S = id("toggle_transfer");
 
     private NumismaticNetworking() {}
 
@@ -141,6 +142,17 @@ public final class NumismaticNetworking {
                 syncShopState(sp, shop);
             });
         });
+
+        NetworkManager.registerReceiver(NetworkManager.Side.C2S, TOGGLE_TRANSFER_C2S, (buf, ctx) -> {
+            BlockPos pos = buf.readBlockPos();
+            ctx.queue(() -> {
+                if (!(ctx.getPlayer() instanceof ServerPlayer sp)) return;
+                ShopBlockEntity shop = resolveShop(sp.serverLevel(), pos);
+                if (shop == null || !shop.canEdit(sp)) return;
+                synchronized (shop) { shop.toggleTransfer(); }
+                syncShopState(sp, shop);
+            });
+        });
     }
 
     private static ShopBlockEntity resolveShop(Level level, BlockPos pos) {
@@ -162,9 +174,16 @@ public final class NumismaticNetworking {
         buf.writeBlockPos(shop.getBlockPos());
         buf.writeBoolean(shop.canEdit(player));
         buf.writeBoolean(shop.isAdmin());
+        buf.writeBoolean(shop.allowsTransfer());
         buf.writeNbt(shop.getOffers().toTag());
         buf.writeLong(shop.getAccumulatedRevenue());
         NetworkManager.sendToPlayer(player, SYNC_SHOP_STATE_S2C, buf);
+    }
+
+    public static void sendToggleTransfer(BlockPos pos) {
+        FriendlyByteBuf buf = new FriendlyByteBuf(io.netty.buffer.Unpooled.buffer());
+        buf.writeBlockPos(pos);
+        NetworkManager.sendToServer(TOGGLE_TRANSFER_C2S, buf);
     }
 
     public static void sendDepositAll() {

@@ -82,6 +82,7 @@ public class ShopScreen extends AbstractContainerScreen<ShopMenu> {
     @Nullable private Button extractBtn;
     @Nullable private Button submitBtn;
     @Nullable private Button deleteBtn;
+    @Nullable private Button transferBtn;
     @Nullable private EditBox priceField;
 
     /** When the owner clicks a trade-button, its template becomes the edit
@@ -127,6 +128,21 @@ public class ShopScreen extends AbstractContainerScreen<ShopMenu> {
                     1, b -> selectTab(1)));
             tabChest.active = tab != 0;
             tabEmerald.active = tab != 1;
+
+            // Hopper-transfer toggle (owner only, both tabs). Plain vanilla
+            // button to the left of the background, below the two tab
+            // buttons.
+            Component transferLabel = ClientShopState.allowsTransfer()
+                    ? Component.literal("H: ON")
+                    : Component.literal("H: OFF");
+            transferBtn = addRenderableWidget(Button.builder(transferLabel, b -> {
+                        BlockPos pos = ClientShopState.getPos();
+                        if (pos != null) NumismaticNetworking.sendToggleTransfer(pos);
+                    })
+                    .bounds(leftPos + TAB_X_OFFSET, topPos + TAB_Y1 + TAB_H + 4, TAB_W, 16)
+                    .tooltip(net.minecraft.client.gui.components.Tooltip.create(
+                            Component.translatable("gui.numismatic_reimagined.shop.transfer_tooltip")))
+                    .build());
         }
 
         int px = leftPos + CUR_X_OFFSET;
@@ -567,10 +583,11 @@ public class ShopScreen extends AbstractContainerScreen<ShopMenu> {
             if (mouseX >= px && mouseX < px + CUR_W
                     && mouseY >= topPos && mouseY < topPos + CUR_H) return false;
         }
-        // Tab buttons area (left of the background).
+        // Tab buttons + transfer-toggle button (left of the background).
         int tx = leftPos + TAB_X_OFFSET;
+        int leftPanelMaxY = topPos + TAB_Y1 + TAB_H + 4 + 16; // includes transferBtn (16 tall)
         if (mouseX >= tx && mouseX < tx + TAB_W
-                && mouseY >= topPos + TAB_Y0 && mouseY < topPos + TAB_Y1 + TAB_H) return false;
+                && mouseY >= topPos + TAB_Y0 && mouseY < leftPanelMaxY) return false;
         return super.hasClickedOutside(mouseX, mouseY, guiLeft, guiTop, mouseButton);
     }
 

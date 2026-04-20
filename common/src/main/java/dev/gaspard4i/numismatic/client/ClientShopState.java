@@ -10,23 +10,26 @@ public final class ClientShopState {
     @Nullable private static BlockPos pos;
     private static boolean canEdit;
     private static boolean isAdmin;
+    private static boolean allowsTransfer;
     private static OfferList offers = new OfferList();
     private static long revenue;
 
     private ClientShopState() {}
 
     public static void update(BlockPos pos, boolean canEdit, boolean isAdmin,
-                              OfferList offers, long revenue) {
+                              OfferList offers, long revenue, boolean allowsTransfer) {
         ClientShopState.pos = pos;
         ClientShopState.canEdit = canEdit;
         ClientShopState.isAdmin = isAdmin;
         ClientShopState.offers = offers;
         ClientShopState.revenue = revenue;
+        ClientShopState.allowsTransfer = allowsTransfer;
     }
 
     @Nullable public static BlockPos getPos() { return pos; }
     public static boolean canEdit() { return canEdit; }
     public static boolean isAdmin() { return isAdmin; }
+    public static boolean allowsTransfer() { return allowsTransfer; }
     public static OfferList getOffers() { return offers; }
     public static long getRevenue() { return revenue; }
 
@@ -34,6 +37,7 @@ public final class ClientShopState {
         pos = null;
         canEdit = false;
         isAdmin = false;
+        allowsTransfer = false;
         offers = new OfferList();
         revenue = 0;
     }

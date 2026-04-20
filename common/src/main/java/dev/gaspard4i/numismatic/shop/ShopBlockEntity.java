@@ -1,10 +1,12 @@
 package dev.gaspard4i.numismatic.shop;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.ContainerHelper;
+import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -15,6 +17,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
+import java.util.stream.IntStream;
 
 /**
  * Backs both the player shop and the admin shop. Holds:
@@ -25,7 +28,7 @@ import java.util.UUID;
  *   <li>accumulated bronze revenue, paid out via withdraw button</li>
  * </ul>
  */
-public class ShopBlockEntity extends RandomizableContainerBlockEntity {
+public class ShopBlockEntity extends RandomizableContainerBlockEntity implements WorldlyContainer {
 
     public static final int STOCK_SIZE = 27;
 
@@ -33,11 +36,13 @@ public class ShopBlockEntity extends RandomizableContainerBlockEntity {
     private static final String TAG_IS_ADMIN = "IsAdmin";
     private static final String TAG_OFFERS = "OfferList";
     private static final String TAG_REVENUE = "Revenue";
+    private static final String TAG_ALLOWS_TRANSFER = "AllowsTransfer";
 
     private NonNullList<ItemStack> items = NonNullList.withSize(STOCK_SIZE, ItemStack.EMPTY);
     @Nullable
     private UUID owner;
     private boolean isAdmin = false;
+    private boolean allowsTransfer = false;
     private OfferList offers = new OfferList();
     private long accumulatedRevenue = 0;
 
@@ -102,6 +107,35 @@ public class ShopBlockEntity extends RandomizableContainerBlockEntity {
     public void setAdmin(boolean admin) {
         this.isAdmin = admin;
         setChanged();
+    }
+
+    // --- Transfer (hopper input) toggle ---
+
+    public boolean allowsTransfer() { return allowsTransfer; }
+
+    public void setAllowsTransfer(boolean v) {
+        if (this.allowsTransfer == v) return;
+        this.allowsTransfer = v;
+        setChanged();
+    }
+
+    public void toggleTransfer() { setAllowsTransfer(!allowsTransfer); }
+
+    // --- WorldlyContainer (hopper IO) ---
+
+    @Override
+    public int[] getSlotsForFace(Direction side) {
+        return allowsTransfer ? IntStream.range(0, STOCK_SIZE).toArray() : new int[0];
+    }
+
+    @Override
+    public boolean canPlaceItemThroughFace(int slot, ItemStack stack, @Nullable Direction dir) {
+        return ShopTransferLogic.canHopperInsert(stack, offers.asList(), allowsTransfer);
+    }
+
+    @Override
+    public boolean canTakeItemThroughFace(int slot, ItemStack stack, Direction dir) {
+        return false;
     }
 
     public boolean isOwner(Player player) {
@@ -195,6 +229,7 @@ public class ShopBlockEntity extends RandomizableContainerBlockEntity {
         }
         if (owner != null) tag.putUUID(TAG_OWNER, owner);
         tag.putBoolean(TAG_IS_ADMIN, isAdmin);
+        tag.putBoolean(TAG_ALLOWS_TRANSFER, allowsTransfer);
         tag.put(TAG_OFFERS, offers.toTag());
         tag.putLong(TAG_REVENUE, accumulatedRevenue);
     }
@@ -208,6 +243,7 @@ public class ShopBlockEntity extends RandomizableContainerBlockEntity {
         }
         owner = tag.hasUUID(TAG_OWNER) ? tag.getUUID(TAG_OWNER) : null;
         isAdmin = tag.getBoolean(TAG_IS_ADMIN);
+        allowsTransfer = tag.getBoolean(TAG_ALLOWS_TRANSFER);
         offers = OfferList.fromTag(tag.getCompound(TAG_OFFERS));
         accumulatedRevenue = tag.getLong(TAG_REVENUE);
     }
