@@ -254,7 +254,7 @@ public final class NumismaticCommands {
         long amount = LongArgumentType.getLong(context, "amount");
         ServerLevel overworld = target.server.overworld();
         PlayerCurrencyManager manager = PlayerCurrencyManager.get(overworld);
-        manager.addBalance(target.getUUID(), amount);
+        manager.addBalanceAndTrack(overworld, target.getUUID(), amount);
 
         String formatted = formatBalance(amount);
         NumismaticNetworking.syncToClient(target, manager);

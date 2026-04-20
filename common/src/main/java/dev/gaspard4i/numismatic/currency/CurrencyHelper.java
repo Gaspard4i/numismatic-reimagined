@@ -179,7 +179,11 @@ public final class CurrencyHelper {
         }
 
         if (totalDeposited > 0) {
-            manager.addBalance(player.getUUID(), totalDeposited);
+            net.minecraft.server.level.ServerLevel overworld = null;
+            if (player instanceof net.minecraft.server.level.ServerPlayer sp) {
+                overworld = sp.server.overworld();
+            }
+            manager.addBalanceAndTrack(overworld, player.getUUID(), totalDeposited);
         }
 
         return totalDeposited;

@@ -147,7 +147,7 @@ public class MoneyBagItem extends Item {
             if (value > 0) {
                 net.minecraft.server.level.ServerLevel overworld = serverPlayer.server.overworld();
                 PlayerCurrencyManager manager = PlayerCurrencyManager.get(overworld);
-                manager.addBalance(serverPlayer.getUUID(), value);
+                manager.addBalanceAndTrack(overworld, serverPlayer.getUUID(), value);
 
                 // Show actionbar notification (total in coins)
                 serverPlayer.displayClientMessage(

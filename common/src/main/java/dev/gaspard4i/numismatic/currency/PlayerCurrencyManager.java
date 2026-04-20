@@ -90,6 +90,24 @@ public class PlayerCurrencyManager extends SavedData {
     }
 
     /**
+     * Adds currency AND records the inflow into the server-wide
+     * {@link AccumulationTracker}, firing the StarCoin advancement trigger
+     * when the threshold is crossed.
+     */
+    public long addBalanceAndTrack(ServerLevel overworld, UUID playerId, long amount) {
+        long newBalance = addBalance(playerId, amount);
+        if (amount > 0 && overworld != null) {
+            long newTotal = AccumulationTracker.get(overworld).add(playerId, amount);
+            ServerPlayer sp = overworld.getServer().getPlayerList().getPlayer(playerId);
+            if (sp != null) {
+                dev.gaspard4i.numismatic.advancement.NumismaticTriggers.COLLECT_NETHERITE
+                        .trigger(sp, newTotal);
+            }
+        }
+        return newBalance;
+    }
+
+    /**
      * Subtracts currency from a player's purse.
      *
      * @return true if successful

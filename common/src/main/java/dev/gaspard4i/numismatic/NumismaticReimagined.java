@@ -1,5 +1,6 @@
 package dev.gaspard4i.numismatic;
 
+import dev.gaspard4i.numismatic.advancement.NumismaticTriggers;
 import dev.gaspard4i.numismatic.block.NumismaticBlocks;
 import dev.gaspard4i.numismatic.command.NumismaticCommands;
 import dev.gaspard4i.numismatic.event.NumismaticEvents;
@@ -19,6 +20,7 @@ public final class NumismaticReimagined {
         NumismaticBlocks.register();
         ShopRegistry.register();
         NumismaticNetworking.registerServerReceivers();
+        NumismaticTriggers.register();
         NumismaticEvents.register();
         NumismaticCommands.register();
     }

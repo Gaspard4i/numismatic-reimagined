@@ -109,6 +109,8 @@ subprojects {
                     "dev/gaspard4i/numismatic/currency/CurrencyHelper*.class",
                     // Events (Architectury event registration)
                     "dev/gaspard4i/numismatic/event/**",
+                    // Advancement triggers (depend on SimpleCriterionTrigger/ServerPlayer runtime)
+                    "dev/gaspard4i/numismatic/advancement/**",
                     // Platform abstractions
                     "dev/gaspard4i/numismatic/platform/**",
                     // Constants

@@ -79,7 +79,7 @@ public class CoinItem extends Item {
             if (value > 0) {
                 ServerLevel overworld = serverPlayer.server.overworld();
                 PlayerCurrencyManager manager = PlayerCurrencyManager.get(overworld);
-                manager.addBalance(serverPlayer.getUUID(), value);
+                manager.addBalanceAndTrack(overworld, serverPlayer.getUUID(), value);
 
                 stack.shrink(stack.getCount());
 
