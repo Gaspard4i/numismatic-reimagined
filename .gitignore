@@ -37,8 +37,9 @@ gradle-local.properties
 
 # Claude
 .claude/
-CLAUDE.md
 
-# Markdown (sauf README)
+# Markdown : tracker README, CLAUDE.md, CHANGELOG.md uniquement
 *.md
 !README.md
+!CLAUDE.md
+!CHANGELOG.md

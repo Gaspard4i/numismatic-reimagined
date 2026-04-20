@@ -1,8 +1,0 @@
-{
-  "variants": {
-    "facing=north": { "model": "numismatic_reimagined:block/request_board" },
-    "facing=south": { "model": "numismatic_reimagined:block/request_board", "y": 180 },
-    "facing=west":  { "model": "numismatic_reimagined:block/request_board", "y": 270 },
-    "facing=east":  { "model": "numismatic_reimagined:block/request_board", "y": 90 }
-  }
-}
