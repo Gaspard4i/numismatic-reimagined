@@ -22,10 +22,10 @@ public final class FabricPurseInventoryHook {
             int left = acc.numismatic$getLeftPos();
             int top = acc.numismatic$getTopPos();
 
-            // Place to the right of the recipe book button column, aligned with
-            // the top of the inventory panel (176x166 vanilla layout).
-            int x = left + 180;
-            int y = top + 10;
+            // Tiny money-bag icon above the crafting output (top-right of
+            // the inventory panel, style matching the original mod).
+            int x = left + 152;
+            int y = top + 6;
             Screens.getButtons(inv).add(new PurseInventoryWidget(x, y));
         });
     }

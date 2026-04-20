@@ -55,8 +55,15 @@ public final class NumismaticItems {
                         output.accept(new ItemStack(NumismaticBlocks.PIGGY_BANK_ITEM.get()));
                         output.accept(new ItemStack(NumismaticBlocks.GOLDEN_PIGGY_BANK_ITEM.get()));
                         output.accept(new ItemStack(NumismaticBlocks.NETHERITE_PIGGY_BANK_ITEM.get()));
-                        output.accept(new ItemStack(dev.gaspard4i.numismatic.shop.ShopRegistry.SHOP_BLOCK_ITEM.get()));
-                        output.accept(new ItemStack(dev.gaspard4i.numismatic.shop.ShopRegistry.ADMIN_SHOP_BLOCK_ITEM.get()));
+                        // Shop tiers
+                        for (dev.gaspard4i.numismatic.shop.ShopTier tier :
+                                dev.gaspard4i.numismatic.shop.ShopTier.values()) {
+                            output.accept(new ItemStack(
+                                    dev.gaspard4i.numismatic.shop.ShopRegistry.blockItem(tier).get()));
+                        }
+                        // Reverse shop
+                        output.accept(new ItemStack(
+                                dev.gaspard4i.numismatic.shop.ShopRegistry.REQUEST_BOARD_ITEM.get()));
                     })
             )
     );

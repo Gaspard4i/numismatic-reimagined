@@ -5,7 +5,9 @@ import dev.architectury.registry.menu.MenuRegistry;
 import dev.gaspard4i.numismatic.NumismaticConstants;
 import dev.gaspard4i.numismatic.client.PurseHudOverlay;
 import dev.gaspard4i.numismatic.client.PurseKeybindState;
+import dev.gaspard4i.numismatic.client.render.ShopBlockEntityRenderer;
 import dev.gaspard4i.numismatic.client.screen.ShopScreen;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import dev.gaspard4i.numismatic.client.tooltip.CurrencyTooltipComponent;
 import dev.gaspard4i.numismatic.client.tooltip.CurrencyTooltipData;
 import net.minecraft.client.KeyMapping;
@@ -42,6 +44,7 @@ public class NumismaticReimaginedForgeClient {
                     (stack, level, entity, seed) -> MoneyBagItem.getTierFloat(stack));
 
             MenuRegistry.registerScreenFactory(ShopRegistry.SHOP_MENU.get(), ShopScreen::new);
+            BlockEntityRenderers.register(ShopRegistry.SHOP_BLOCK_ENTITY.get(), ShopBlockEntityRenderer::new);
         });
     }
 

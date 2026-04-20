@@ -35,10 +35,16 @@ public class ShopBlock extends BaseEntityBlock {
 
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 
-    // The shop model only fills the bottom 12/16 of the block (4 legs +
-    // top shelf). Match the hitbox so the player can't bump into invisible
-    // air above the block.
-    private static final VoxelShape SHAPE = Block.box(0, 0, 0, 16, 12, 16);
+    // Hitbox ported verbatim from wisp-forest/numismatic-overhaul ShopBlock :
+    // main central pillar + top display plate + 4 corner legs.
+    private static final VoxelShape MAIN_PILLAR = Block.box(1, 0, 1, 14, 8, 14);
+    private static final VoxelShape PLATE = Block.box(0, 8, 0, 16, 12, 16);
+    private static final VoxelShape LEG_NE = Block.box(13, 0, 0, 16, 8, 3);
+    private static final VoxelShape LEG_NW = Block.box(0, 0, 0, 3, 8, 3);
+    private static final VoxelShape LEG_SW = Block.box(0, 0, 13, 3, 8, 16);
+    private static final VoxelShape LEG_SE = Block.box(13, 0, 13, 16, 8, 16);
+    private static final VoxelShape SHAPE = net.minecraft.world.phys.shapes.Shapes.or(
+            MAIN_PILLAR, PLATE, LEG_NE, LEG_NW, LEG_SW, LEG_SE);
 
     private final ShopTier tier;
 
@@ -153,5 +159,14 @@ public class ShopBlock extends BaseEntityBlock {
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new ShopBlockEntity(ShopRegistry.SHOP_BLOCK_ENTITY.get(), pos, state);
+    }
+
+    @Nullable
+    @Override
+    public <T extends BlockEntity> net.minecraft.world.level.block.entity.BlockEntityTicker<T> getTicker(
+            Level level, BlockState state,
+            net.minecraft.world.level.block.entity.BlockEntityType<T> type) {
+        return net.minecraft.world.level.block.BaseEntityBlock.createTickerHelper(
+                type, ShopRegistry.SHOP_BLOCK_ENTITY.get(), ShopBlockEntity::tick);
     }
 }

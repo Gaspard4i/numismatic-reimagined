@@ -67,6 +67,24 @@ public class ShopBlockEntity extends RandomizableContainerBlockEntity implements
 
     public ShopTier getTier() { return tier; }
 
+    // --- Hologram cycling (client rendering) ---
+    private int tradeIndex = 0;
+    /** Ticker-registered so the client can cycle through offers every 3s. */
+    public static void tick(net.minecraft.world.level.Level level, BlockPos pos, BlockState state, ShopBlockEntity be) {
+        if (level.getGameTime() % 60 == 0) be.tradeIndex++;
+    }
+
+    /** Returns the currently displayed offer's template stack (or empty). */
+    public ItemStack getItemToRender() {
+        if (offers.isEmpty()) return ItemStack.EMPTY;
+        if (tradeIndex >= offers.size() || tradeIndex < 0) tradeIndex = 0;
+        ShopOffer o = offers.get(tradeIndex);
+        if (o == null) return ItemStack.EMPTY;
+        ItemStack copy = o.template().copy();
+        copy.setCount(1);
+        return copy;
+    }
+
     // --- Container ---
 
     @Override

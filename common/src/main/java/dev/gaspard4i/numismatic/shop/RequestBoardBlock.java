@@ -20,7 +20,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -33,6 +37,14 @@ import org.jetbrains.annotations.Nullable;
 public class RequestBoardBlock extends BaseEntityBlock {
 
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+
+    // Lectern-style pedestal: a wide base and a slanted reading surface
+    // on top. Matches the physical look of a quest board without the
+    // texture being visibly cropped.
+    private static final VoxelShape BASE = Block.box(2, 0, 2, 14, 2, 14);
+    private static final VoxelShape STEM = Block.box(5, 2, 5, 11, 10, 11);
+    private static final VoxelShape TOP = Block.box(1, 10, 1, 15, 15, 15);
+    private static final VoxelShape SHAPE = Shapes.or(BASE, STEM, TOP);
 
     public RequestBoardBlock(Properties properties) {
         super(properties);
@@ -51,6 +63,11 @@ public class RequestBoardBlock extends BaseEntityBlock {
     }
 
     @Override public RenderShape getRenderShape(BlockState state) { return RenderShape.MODEL; }
+
+    @Override
+    public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+        return SHAPE;
+    }
 
     @Override
     public BlockState rotate(BlockState state, Rotation rotation) {

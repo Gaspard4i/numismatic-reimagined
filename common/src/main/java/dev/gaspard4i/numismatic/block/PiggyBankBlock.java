@@ -31,7 +31,6 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -51,27 +50,49 @@ public class PiggyBankBlock extends BaseEntityBlock {
 
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 
-    // Directional hitbox: body + coin slot + 4 feet. The slot is the only
-    // piece that rotates with FACING; everything else is symmetric.
-    private static final VoxelShape BODY = Block.box(5, 1, 5, 11, 7, 11);
-    private static final VoxelShape SNOUT = Block.box(6, 3, 3, 10, 6, 5);  // snout (cylinder) at front
-    private static final VoxelShape SLOT_NORTH = Block.box(7, 7, 4, 9, 8, 6);
-    private static final VoxelShape FOOT_NW = Block.box(5, 0, 5, 6, 1, 6);
-    private static final VoxelShape FOOT_NE = Block.box(10, 0, 5, 11, 1, 6);
-    private static final VoxelShape FOOT_SW = Block.box(5, 0, 10, 6, 1, 11);
-    private static final VoxelShape FOOT_SE = Block.box(10, 0, 10, 11, 1, 11);
-    private static final VoxelShape FEET = Shapes.or(FOOT_NW, FOOT_NE, FOOT_SW, FOOT_SE);
-    private static final VoxelShape BASE = Shapes.joinUnoptimized(BODY, FEET, BooleanOp.OR).optimize();
+    // Hitboxes ported verbatim from wisp-forest/numismatic-overhaul
+    // PiggyBankBlock (body + snout + 4 feet, rotated per FACING).
+    private static final VoxelShape NORTH_SHAPE = Shapes.or(
+            Block.box(7, 2, 4, 9, 4, 5),    // snout
+            Block.box(5, 1, 5, 11, 6, 11),  // body
+            Block.box(5, 0, 5, 6, 1, 7),    // NW foot
+            Block.box(5, 0, 9, 6, 1, 11),   // SW foot
+            Block.box(10, 0, 9, 11, 1, 11), // SE foot
+            Block.box(10, 0, 5, 11, 1, 7)   // NE foot
+    );
+    private static final VoxelShape SOUTH_SHAPE = Shapes.or(
+            Block.box(7, 2, 11, 9, 4, 12),
+            Block.box(5, 1, 5, 11, 6, 11),
+            Block.box(10, 0, 9, 11, 1, 11),
+            Block.box(10, 0, 5, 11, 1, 7),
+            Block.box(5, 0, 5, 6, 1, 7),
+            Block.box(5, 0, 9, 6, 1, 11)
+    );
+    private static final VoxelShape EAST_SHAPE = Shapes.or(
+            Block.box(11, 2, 7, 12, 4, 9),
+            Block.box(5, 1, 5, 11, 6, 11),
+            Block.box(5, 0, 5, 7, 1, 6),
+            Block.box(5, 0, 10, 7, 1, 11),
+            Block.box(9, 0, 10, 11, 1, 11),
+            Block.box(9, 0, 5, 11, 1, 6)
+    );
+    private static final VoxelShape WEST_SHAPE = Shapes.or(
+            Block.box(4, 2, 7, 5, 4, 9),
+            Block.box(5, 1, 5, 11, 6, 11),
+            Block.box(9, 0, 10, 11, 1, 11),
+            Block.box(9, 0, 5, 11, 1, 6),
+            Block.box(5, 0, 5, 7, 1, 6),
+            Block.box(5, 0, 10, 7, 1, 11)
+    );
 
     private static final Map<Direction, VoxelShape> SHAPES = buildShapes();
 
     private static Map<Direction, VoxelShape> buildShapes() {
         Map<Direction, VoxelShape> map = new EnumMap<>(Direction.class);
-        for (Direction dir : Direction.Plane.HORIZONTAL) {
-            VoxelShape rotatedSnout = PiggyBankShapes.rotateHorizontal(SNOUT, dir);
-            VoxelShape rotatedSlot = PiggyBankShapes.rotateHorizontal(SLOT_NORTH, dir);
-            map.put(dir, Shapes.or(BASE, rotatedSnout, rotatedSlot));
-        }
+        map.put(Direction.NORTH, NORTH_SHAPE);
+        map.put(Direction.SOUTH, SOUTH_SHAPE);
+        map.put(Direction.EAST, EAST_SHAPE);
+        map.put(Direction.WEST, WEST_SHAPE);
         return map;
     }
 

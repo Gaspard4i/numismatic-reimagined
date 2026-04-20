@@ -132,20 +132,14 @@ public class ShopScreen extends AbstractContainerScreen<ShopMenu> {
             tabChest.active = tab != 0;
             tabEmerald.active = tab != 1;
 
-            // Hopper-transfer toggle (owner only, both tabs). Plain vanilla
-            // button to the left of the background, below the two tab
-            // buttons.
-            Component transferLabel = ClientShopState.allowsTransfer()
-                    ? Component.literal("H: ON")
-                    : Component.literal("H: OFF");
-            transferBtn = addRenderableWidget(Button.builder(transferLabel, b -> {
+            // Hopper-transfer toggle (owner only). Hopper icon + coloured
+            // check/cross overlay, same pattern as the original mod.
+            transferBtn = addRenderableWidget(new HopperToggleButton(
+                    leftPos + TAB_X_OFFSET, topPos + TAB_Y1 + TAB_H + 6,
+                    () -> {
                         BlockPos pos = ClientShopState.getPos();
                         if (pos != null) NumismaticNetworking.sendToggleTransfer(pos);
-                    })
-                    .bounds(leftPos + TAB_X_OFFSET, topPos + TAB_Y1 + TAB_H + 4, TAB_W, 16)
-                    .tooltip(net.minecraft.client.gui.components.Tooltip.create(
-                            Component.translatable("gui.numismatic_reimagined.shop.transfer_tooltip")))
-                    .build());
+                    }));
         }
 
         int px = leftPos + CUR_X_OFFSET;
@@ -319,8 +313,11 @@ public class ShopScreen extends AbstractContainerScreen<ShopMenu> {
             // The panel has a 12px-tall "placeholder zone" (yellow/black hatching)
             // at y=36..47 where the save/delete buttons sit. The actual button
             // sprites are only 10px tall, so paint over the hatching with the
-            // panel's body colour before the buttons draw on top.
-            g.fill(px + 5, topPos + 35, px + 96, topPos + 48, 0xFFC6C6C6);
+            // panel's body colour before the buttons draw on top. Match the
+            // buttons' exact horizontal extent (7..48, 50..91) so nothing
+            // leaks past.
+            g.fill(px + 7, topPos + 35, px + 48, topPos + 48, 0xFFC6C6C6);
+            g.fill(px + 50, topPos + 35, px + 91, topPos + 48, 0xFFC6C6C6);
 
             // Fake slot item (x=8, y=15 relative to the trade-edit panel).
             if (!editBuffer.isEmpty()) {
@@ -604,7 +601,7 @@ public class ShopScreen extends AbstractContainerScreen<ShopMenu> {
         }
         // Tab buttons + transfer-toggle button (left of the background).
         int tx = leftPos + TAB_X_OFFSET;
-        int leftPanelMaxY = topPos + TAB_Y1 + TAB_H + 4 + 16; // includes transferBtn (16 tall)
+        int leftPanelMaxY = topPos + TAB_Y1 + TAB_H + 6 + 20; // includes transferBtn (20 tall)
         if (mouseX >= tx && mouseX < tx + TAB_W
                 && mouseY >= topPos + TAB_Y0 && mouseY < leftPanelMaxY) return false;
         return super.hasClickedOutside(mouseX, mouseY, guiLeft, guiTop, mouseButton);
@@ -661,6 +658,36 @@ public class ShopScreen extends AbstractContainerScreen<ShopMenu> {
             if (!this.active) v += 2 * this.height;
             else if (this.isHoveredOrFocused()) v += this.height;
             g.blit(tex, getX(), getY(), uvU, v, this.width, this.height, 256, 256);
+        }
+    }
+
+    /**
+     * Hopper icon with a coloured check/cross overlay showing whether the
+     * shop currently accepts hopper input (matching the original mod).
+     */
+    private static final class HopperToggleButton extends Button {
+        private static final net.minecraft.world.item.ItemStack ICON =
+                new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.HOPPER);
+
+        HopperToggleButton(int x, int y, Runnable onClick) {
+            super(x, y, 20, 20, Component.empty(),
+                    b -> onClick.run(), DEFAULT_NARRATION);
+        }
+
+        @Override
+        public void renderWidget(GuiGraphics g, int mouseX, int mouseY, float partial) {
+            // Vanilla button slot background for visual feedback on hover.
+            int bg = isHoveredOrFocused() ? 0x60FFFFFF : 0x40000000;
+            g.fill(getX(), getY(), getX() + width, getY() + height, bg);
+            g.renderItem(ICON, getX() + 2, getY() + 2);
+            // Overlay : green check or red cross in the bottom-right corner.
+            boolean on = ClientShopState.allowsTransfer();
+            String glyph = on ? "\u2714" : "\u2718"; // ✔ / ✘
+            int color = on ? 0xFF28FFBF : 0xFFEB1D36;
+            net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
+            g.drawString(mc.font, glyph,
+                    getX() + width - mc.font.width(glyph) - 1,
+                    getY() + height - 9, color, true);
         }
     }
 }

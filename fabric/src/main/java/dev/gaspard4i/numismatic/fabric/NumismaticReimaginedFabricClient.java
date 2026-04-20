@@ -5,7 +5,9 @@ import dev.architectury.registry.menu.MenuRegistry;
 import dev.gaspard4i.numismatic.NumismaticConstants;
 import dev.gaspard4i.numismatic.client.PurseHudOverlay;
 import dev.gaspard4i.numismatic.client.PurseKeybindState;
+import dev.gaspard4i.numismatic.client.render.ShopBlockEntityRenderer;
 import dev.gaspard4i.numismatic.client.screen.ShopScreen;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import dev.gaspard4i.numismatic.client.tooltip.CurrencyTooltipComponent;
 import dev.gaspard4i.numismatic.client.tooltip.CurrencyTooltipData;
 import net.fabricmc.fabric.api.client.rendering.v1.TooltipComponentCallback;
@@ -35,6 +37,9 @@ public class NumismaticReimaginedFabricClient implements ClientModInitializer {
 
         // Register shop screen factory for the SHOP_MENU type
         MenuRegistry.registerScreenFactory(ShopRegistry.SHOP_MENU.get(), ShopScreen::new);
+
+        // Render the current offer as a floating hologram above the shop plate.
+        BlockEntityRenderers.register(ShopRegistry.SHOP_BLOCK_ENTITY.get(), ShopBlockEntityRenderer::new);
 
         // Custom tooltip: coin/money-bag show icon+count stack
         TooltipComponentCallback.EVENT.register(data ->

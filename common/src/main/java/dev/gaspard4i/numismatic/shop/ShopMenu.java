@@ -42,18 +42,16 @@ public class ShopMenu extends AbstractContainerMenu {
         int rows = Math.max(1, size / STOCK_COLS);
         int cols = STOCK_COLS;
 
-        // Stock grid : rows×9, starting at (8, 18).
+        // Stock grid : rows×9, starting at (8, 17) — matches shop.xml of
+        // the upstream mod exactly. The +1 offset used previously pushed
+        // items outside their cell.
         for (int row = 0; row < rows; row++) {
             for (int col = 0; col < cols; col++) {
                 int index = col + row * cols;
-                addSlot(new AutoHidingSlot(stockContainer, index, 8 + col * 18, 18 + row * 18));
+                addSlot(new AutoHidingSlot(stockContainer, index, 8 + col * 18, 17 + row * 18));
             }
         }
-        // Player inventory + hotbar below the stock grid. The vanilla chest
-        // layout reserves 18 px per row, so the inventory simply starts after
-        // the last stock row + small gap (+11 pixels to match shop.xml's
-        // inventoryLabelY=75 when rows=3).
-        int invY = 18 + rows * 18 + 14;
+        int invY = 17 + rows * 18 + 14;
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
                 addSlot(new Slot(playerInv, col + row * 9 + 9, 8 + col * 18, invY + row * 18));

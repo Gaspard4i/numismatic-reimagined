@@ -10,6 +10,7 @@
       "translate": "advancement.numismatic_reimagined.star_coin.description"
     },
     "frame": "challenge",
+    "background": "minecraft:textures/block/netherite_block.png",
     "show_toast": true,
     "announce_to_chat": true,
     "hidden": false
