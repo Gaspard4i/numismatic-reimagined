@@ -149,12 +149,7 @@ public class MoneyBagItem extends Item {
                 PlayerCurrencyManager manager = PlayerCurrencyManager.get(overworld);
                 manager.addBalanceAndTrack(overworld, serverPlayer.getUUID(), value);
 
-                // Show actionbar notification (total in coins)
-                serverPlayer.displayClientMessage(
-                        Component.translatable("notification.numismatic_reimagined.collected",
-                                String.format("%,d", value))
-                                .withStyle(ChatFormatting.GREEN), true);
-
+                // Actionbar feedback is batched per-tick by CurrencyTransactions.
                 NumismaticNetworking.syncToClient(serverPlayer, manager);
             }
         }

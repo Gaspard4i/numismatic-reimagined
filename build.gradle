@@ -109,6 +109,7 @@ subprojects {
                     // Currency manager (SavedData = côté serveur, besoin ServerLevel)
                     "dev/gaspard4i/numismatic/currency/PlayerCurrencyManager*.class",
                     "dev/gaspard4i/numismatic/currency/CurrencyHelper*.class",
+                    "dev/gaspard4i/numismatic/currency/CurrencyTransactions*.class",
                     // Events (Architectury event registration)
                     "dev/gaspard4i/numismatic/event/**",
                     // Advancement triggers (depend on SimpleCriterionTrigger/ServerPlayer runtime)

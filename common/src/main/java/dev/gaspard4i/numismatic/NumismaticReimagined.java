@@ -3,6 +3,7 @@ package dev.gaspard4i.numismatic;
 import dev.gaspard4i.numismatic.advancement.NumismaticTriggers;
 import dev.gaspard4i.numismatic.block.NumismaticBlocks;
 import dev.gaspard4i.numismatic.command.NumismaticCommands;
+import dev.gaspard4i.numismatic.currency.CurrencyTransactions;
 import dev.gaspard4i.numismatic.event.NumismaticEvents;
 import dev.gaspard4i.numismatic.item.NumismaticItems;
 import dev.gaspard4i.numismatic.network.NumismaticNetworking;
@@ -23,5 +24,6 @@ public final class NumismaticReimagined {
         NumismaticTriggers.register();
         NumismaticEvents.register();
         NumismaticCommands.register();
+        CurrencyTransactions.registerTickHook();
     }
 }

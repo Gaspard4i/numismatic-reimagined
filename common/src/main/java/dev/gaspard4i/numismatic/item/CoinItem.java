@@ -87,12 +87,8 @@ public class CoinItem extends Item {
                         SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.PLAYERS,
                         0.5f, 1.0f + level.getRandom().nextFloat() * 0.4f);
 
-                // Show actionbar notification (total in coins)
-                serverPlayer.displayClientMessage(
-                        Component.translatable("notification.numismatic_reimagined.collected",
-                                String.format("%,d", value))
-                                .withStyle(ChatFormatting.GREEN), true);
-
+                // Actionbar feedback is batched per-tick by
+                // CurrencyTransactions (see addBalanceAndTrack).
                 NumismaticNetworking.syncToClient(serverPlayer, manager);
             }
         }

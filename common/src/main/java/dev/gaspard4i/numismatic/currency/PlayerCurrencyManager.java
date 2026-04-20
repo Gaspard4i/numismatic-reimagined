@@ -91,20 +91,37 @@ public class PlayerCurrencyManager extends SavedData {
 
     /**
      * Adds currency AND records the inflow into the server-wide
-     * {@link AccumulationTracker}, firing the StarCoin advancement trigger
-     * when the threshold is crossed.
+     * {@link AccumulationTracker}, fires the StarCoin advancement trigger
+     * when the threshold is crossed, and pushes a transaction into the
+     * per-player queue so the actionbar notification gets batched.
      */
     public long addBalanceAndTrack(ServerLevel overworld, UUID playerId, long amount) {
         long newBalance = addBalance(playerId, amount);
-        if (amount > 0 && overworld != null) {
-            long newTotal = AccumulationTracker.get(overworld).add(playerId, amount);
+        if (overworld != null) {
             ServerPlayer sp = overworld.getServer().getPlayerList().getPlayer(playerId);
+            if (amount > 0) {
+                long newTotal = AccumulationTracker.get(overworld).add(playerId, amount);
+                if (sp != null) {
+                    dev.gaspard4i.numismatic.advancement.NumismaticTriggers.COLLECT_NETHERITE
+                            .trigger(sp, newTotal);
+                }
+            }
             if (sp != null) {
-                dev.gaspard4i.numismatic.advancement.NumismaticTriggers.COLLECT_NETHERITE
-                        .trigger(sp, newTotal);
+                CurrencyTransactions.push(sp, amount);
             }
         }
         return newBalance;
+    }
+
+    /** Same semantics as {@link #addBalanceAndTrack} but for withdrawals
+     *  (negative delta). Shorthand helper so callers don't need to branch. */
+    public boolean subtractBalanceAndNotify(ServerLevel overworld, UUID playerId, long amount) {
+        boolean ok = subtractBalance(playerId, amount);
+        if (ok && overworld != null) {
+            ServerPlayer sp = overworld.getServer().getPlayerList().getPlayer(playerId);
+            if (sp != null) CurrencyTransactions.push(sp, -amount);
+        }
+        return ok;
     }
 
     /**
