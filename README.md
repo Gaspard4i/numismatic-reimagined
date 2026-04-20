@@ -14,11 +14,15 @@ Système de monnaie complet pour Minecraft 1.20.1 — bronze, argent, or, nether
 ## Caractéristiques
 
 - **5 dénominations** : Bronze (1) → Silver (100) → Gold (10 000) → Netherite (1 000 000) → Star Coin (trophée)
-- **Money bags** : sacs auto-tier qui changent d'apparence selon la valeur
-- **Purse** : portefeuille virtuel persistant, accessible via `/numismatic balance`
-- **Tirelires** : 3 variantes (base, dorée, netherite) avec capacités croissantes
-- **Boutiques de joueurs** : place un shop, configure des offres, encaisse les ventes
-- **Boutiques admin** : stock infini, OP-only, compatible LuckPerms
+- **Money bags** : sacs auto-tier qui changent d'apparence selon la valeur. Click-gauche pour absorber pièces/bag, click-droit pour extraire une pile.
+- **Purse** : portefeuille virtuel persistant. Touche **P** pour ouvrir le popup d'extraction (+/- par dénom, shift = ±10). HUD icône en haut à droite dans les inventaires.
+- **Tirelires directionnelles** : 3 variantes (base, dorée, netherite), hitbox sculptée avec fente rotée selon l'orientation.
+- **Boutiques joueur 5 tiers** : bronze (9 slots, 3 offres) → netherite (36 slots, 24 offres). Recipes progressives (chaque tier upgrade le précédent avec la monnaie correspondante).
+- **Boutique admin** : stock infini, OP-only.
+- **Hopper input** : toggle `H: ON/OFF` dans l'UI owner. Whitelist : seul ce qui matche une offre existante peut entrer.
+- **Tooltips icônes** : coins et money bags affichent leur décomposition par icône (pas "1N 2G 3S").
+- **Request Board** (reverse shop) : post des demandes d'items, prefundées, paiement automatique aux livreurs. Support NBT strict + items uniques (durabilité max).
+- **Advancement Star Coin** : accumuler 1 000 Netherite Coins (= 1 milliard de bronze cumulé) dans la purse déclenche l'advancement et donne une Star Coin.
 - **Multi-loader** : Fabric + Forge via Architectury
 
 ## Installation

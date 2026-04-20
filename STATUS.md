@@ -38,58 +38,63 @@
   * Max 56 offres par shop
   * Stack de coins ramené à 64 vanilla (suppression de 3 mixins fragiles)
 
-## Phase 5 : Configuration
-- [ ] Implémenté
-- [ ] Tests unitaires (coverage: ?%)
+## Phase 5a : Hitbox PiggyBank directionnelle
+- [x] Implémenté (commit NR-120)
+- [x] Tests unitaires (PiggyBankShapesTest 6 tests)
 - [ ] Testé manuellement par l'utilisateur
-- [ ] Issues résolues
-- Notes : -
+- Notes : 4 VoxelShapes rotées (N/S/E/W), corps+snout+slot+4 pieds. Logique de rotation extraite dans PiggyBankShapes (pur).
 
-## Phase 6 : Loot Tables + Mob Drops
-- [ ] Implémenté
-- [ ] Tests unitaires (coverage: ?%)
+## Phase 5b : Tooltip coins avec icônes
+- [x] Implémenté (commit NR-121)
+- [x] Tests unitaires (CurrencyTooltipDataTest 11 tests)
 - [ ] Testé manuellement par l'utilisateur
-- [ ] Issues résolues
-- Notes : -
+- Notes : CurrencyTooltipData (pur) + CurrencyTooltipComponent (client). Tooltips coin/bag affichent icônes empilées. Enregistrés Fabric + Forge.
 
-## Phase 7 : Trades Villageois
-- [ ] Implémenté
-- [ ] Tests unitaires (coverage: ?%)
+## Phase 5c : MoneyBag click L/R
+- [x] Implémenté (commit NR-122)
+- [x] Tests unitaires (MoneyBagClickLogicTest 15 tests)
 - [ ] Testé manuellement par l'utilisateur
-- [ ] Issues résolues
-- Notes : -
+- Notes : MoneyBagClickLogic.absorbCoins/absorbBag/extractLargestDenom. Override PRIMARY=absorb, SECONDARY+empty=extract. CoinItem aligné sur PRIMARY.
 
-## Phase 8 : Marketplace (commandes + GUI)
-- [ ] Implémenté
-- [ ] Tests unitaires (coverage: ?%)
+## Phase 6 : Shop hopper transfer toggle
+- [x] Implémenté (commit NR-123)
+- [x] Tests unitaires (ShopTransferLogicTest 8 tests)
 - [ ] Testé manuellement par l'utilisateur
-- [ ] Issues résolues
-- Notes : -
+- Notes : allowsTransfer + WorldlyContainer. canPlaceItem via ShopTransferLogic.canHopperInsert (whitelist offers). Bouton H: ON/OFF sous les tabs owner.
 
-## Phase 9 : Achievements / Star Coin
-- [ ] Implémenté
-- [ ] Tests unitaires (coverage: ?%)
+## Phase 7 : Shop 5 tiers
+- [x] Implémenté (commit NR-124)
+- [x] Tests unitaires (ShopTierTest 8 tests)
 - [ ] Testé manuellement par l'utilisateur
-- [ ] Issues résolues
-- Notes : -
+- Notes : BRONZE(9/3), SILVER(18/6), GOLD(27/12, legacy shop_block), NETHERITE(36/24), ADMIN(27/56). ShopBlock(Properties, ShopTier). ShopMenu + ShopScreen dynamiques (rows 1..4). Recipes bronze/silver/netherite + blockstates/models/lang.
 
-## Phase 10 : Sécurité (hardening)
-- [ ] Implémenté
-- [ ] Tests unitaires (coverage: ?%)
+## Phase 8 : Advancement Star Coin
+- [x] Implémenté (commit NR-125)
+- [x] Tests unitaires (AccumulationTrackerTest 10 tests)
 - [ ] Testé manuellement par l'utilisateur
-- [ ] Issues résolues
-- Notes : -
+- Notes : AccumulationTracker SavedData (monotonic counter). PlayerCurrencyManager.addBalanceAndTrack fire CollectNetheriteTrigger à 1000 netherite cumulés → advancement → mcfunction grant_star_coin.
 
-## Phase 11 : API Addon
-- [ ] Implémenté
-- [ ] Tests unitaires (coverage: ?%)
+## Phase 9 : Purse HUD + popup 4 denoms
+- [x] Implémenté (commit NR-126)
+- [x] Tests unitaires (PurseExtractLogicTest 10 tests)
 - [ ] Testé manuellement par l'utilisateur
-- [ ] Issues résolues
-- Notes : -
+- Notes : PurseHudOverlay affiche icône + total. Keybind P ouvre PurseScreen (Fabric + Forge). PurseExtractLogic pour incrément/decrement avec shift mult + clamp.
 
-## Phase 12 : Port NeoForge + MC 1.21.1
-- [ ] Implémenté
-- [ ] Tests unitaires (coverage: ?%)
+## Phase 10 : Reverse shop / Request Board
+- [x] Implémenté (commit NR-127)
+- [x] Tests unitaires (RequestOfferTest 11, RequestOfferListTest 11, RequestFulfillLogicTest 12)
 - [ ] Testé manuellement par l'utilisateur
-- [ ] Issues résolues
-- Notes : -
+- Notes : RequestBoardBlock + BE + RequestOffer + RequestOfferList + RequestFulfillLogic (pur, matching strictNbt et undamaged). Commandes `/numismatic request fund/add/remove/deliver` (raycast 5 blocs). UI dédiée reportée post-beta.
+
+## Phase 11 : Polish + release beta
+- [x] Implémenté (commit NR-128)
+- [x] Coverage JaCoCo ≥ 96% sur le code testable
+- [ ] Testé end-to-end sur Fabric + Forge par l'utilisateur
+- Notes : Tag v0.1.0-beta. README + STATUS.md synchronisés.
+
+## Post-beta (port 1.21.1 NeoForge)
+- Configuration (game rules, prices, caps)
+- Loot tables + mob drops
+- Villager trades
+- API publique pour addons
+- NeoForge + MC 1.21.1 (+ owo-lib native pour l'UI)
