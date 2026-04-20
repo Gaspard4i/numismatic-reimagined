@@ -82,11 +82,14 @@ public class ShopScreen extends AbstractContainerScreen<ShopMenu> {
     @Nullable private Button submitBtn;
     @Nullable private Button deleteBtn;
     @Nullable private EditBox priceField;
-    @Nullable private EditBox qtyField;
 
     /** When the owner clicks a trade-button, its template becomes the edit
      * buffer. */
     private ItemStack editBuffer = ItemStack.EMPTY;
+
+    /** Quantity to sell per purchase. Adjusted via scroll-on-fake-slot,
+     *  capped at editBuffer.getMaxStackSize() * 27 (full stock fills). */
+    private int editQty = 1;
 
     /** Index in ClientShopState offers of the offer currently being edited.
      *  -1 means we are creating a new offer. */
@@ -141,27 +144,22 @@ public class ShopScreen extends AbstractContainerScreen<ShopMenu> {
                 extractBtn.active = ClientShopState.getRevenue() > 0;
             }
         } else if (tab == 1 && owner) {
-            // Tab 1 = offers : trade-edit (slot + qty + price + save/del) at the top,
-            // currency widget (display + withdraw) at the bottom.
+            // Tab 1 = offers : trade-edit at the top (matching shop.xml layout),
+            // currency widget below.
             int ey = topPos;
 
-            qtyField = new EditBox(font, px + 8, ey + 19, 18, 11, Component.empty());
-            qtyField.setMaxLength(3);
-            qtyField.setBordered(true);
-            qtyField.setTextColor(0xFFFFFF);
-            qtyField.setFilter(s -> s.matches("\\d*"));
-            qtyField.setValue("1");
-            qtyField.setResponder(s -> refreshEditState());
-            addRenderableWidget(qtyField);
-
-            priceField = new EditBox(font, px + 32, ey + 19, 58, 11, Component.empty());
+            // Single price field at (35, 18) rel to edit panel, 47x11 — matches
+            // shop.xml exactly. The 4 bronze/silver/gold/netherite labels sit
+            // above it at (36, 5) via renderEditDenominationLabels.
+            priceField = new EditBox(font, px + 35, ey + 18, 47, 11, Component.empty());
             priceField.setMaxLength(7);
-            priceField.setBordered(true);
+            priceField.setBordered(false);
             priceField.setTextColor(0xFFFFFF);
             priceField.setFilter(s -> s.matches("\\d*"));
             priceField.setResponder(s -> refreshEditState());
             addRenderableWidget(priceField);
 
+            // Save/delete buttons at (7, 36) and (50, 36), 41x10.
             submitBtn = addRenderableWidget(new TexturedButton(
                     px + 7, ey + 36, SUBMIT_W, SUBMIT_H, SUBMIT_UV_U, SUBMIT_UV_V,
                     TEXTURE_PNG, b -> onSubmit()));
@@ -172,7 +170,7 @@ public class ShopScreen extends AbstractContainerScreen<ShopMenu> {
             // Currency widget in the bottom half of the right panel.
             if (!ClientShopState.isAdmin()) {
                 extractBtn = addRenderableWidget(new TexturedButton(
-                        px + EXTRACT_REL_X, topPos + CUR_H + EDIT_H + 3 + EXTRACT_REL_Y - CUR_H,
+                        px + EXTRACT_REL_X, topPos + EDIT_H + 3 + EXTRACT_REL_Y,
                         EXTRACT_W, EXTRACT_H, EXTRACT_UV_U, EXTRACT_UV_V,
                         TEXTURE_PNG,
                         b -> {
@@ -193,6 +191,7 @@ public class ShopScreen extends AbstractContainerScreen<ShopMenu> {
         if (newTab == 0) {
             editBuffer = ItemStack.EMPTY;
             editingIndex = -1;
+            editQty = 1;
         }
         rebuildUI();
     }
@@ -202,7 +201,7 @@ public class ShopScreen extends AbstractContainerScreen<ShopMenu> {
                 && priceField != null
                 && !priceField.getValue().isEmpty()
                 && parsePrice() > 0
-                && parseQty() > 0;
+                && editQty > 0;
         if (submitBtn != null) submitBtn.active = canSubmit;
         if (deleteBtn != null) deleteBtn.active = editingIndex >= 0;
         if (extractBtn != null) extractBtn.active = ClientShopState.getRevenue() > 0;
@@ -214,29 +213,31 @@ public class ShopScreen extends AbstractContainerScreen<ShopMenu> {
         catch (NumberFormatException e) { return 0; }
     }
 
-    private int parseQty() {
-        if (qtyField == null) return 1;
-        try {
-            int q = Integer.parseInt(qtyField.getValue());
-            if (!editBuffer.isEmpty()) q = Math.min(q, editBuffer.getMaxStackSize());
-            return q;
-        } catch (NumberFormatException e) { return 0; }
+    private int maxQty() {
+        if (editBuffer.isEmpty()) return 1;
+        return editBuffer.getMaxStackSize() * ShopMenu.STOCK_SIZE;
+    }
+
+    private void bumpQty(int delta) {
+        int newQty = Math.max(1, Math.min(maxQty(), editQty + delta));
+        if (newQty != editQty) {
+            editQty = newQty;
+            refreshEditState();
+        }
     }
 
     private void onSubmit() {
         BlockPos pos = ClientShopState.getPos();
         if (pos == null || editBuffer.isEmpty()) return;
         long price = parsePrice();
-        int qty = parseQty();
-        if (price <= 0 || qty <= 0) return;
+        if (price <= 0 || editQty <= 0) return;
         ItemStack template = editBuffer.copy();
         template.setCount(1);
-        NumismaticNetworking.sendEditOffer(pos, editingIndex, template, price, qty);
-        // Reset state after creating a brand new offer (not when editing).
+        NumismaticNetworking.sendEditOffer(pos, editingIndex, template, price, editQty);
         if (editingIndex < 0) {
             editBuffer = ItemStack.EMPTY;
+            editQty = 1;
             if (priceField != null) priceField.setValue("");
-            if (qtyField != null) qtyField.setValue("1");
         }
     }
 
@@ -246,8 +247,8 @@ public class ShopScreen extends AbstractContainerScreen<ShopMenu> {
         NumismaticNetworking.sendRemoveOffer(pos, editingIndex);
         editBuffer = ItemStack.EMPTY;
         editingIndex = -1;
+        editQty = 1;
         if (priceField != null) priceField.setValue("");
-        if (qtyField != null) qtyField.setValue("1");
     }
 
     private void loadOfferIntoEdit(int index) {
@@ -257,9 +258,9 @@ public class ShopScreen extends AbstractContainerScreen<ShopMenu> {
         if (offer == null) return;
         editingIndex = index;
         editBuffer = offer.template().copy();
-        editBuffer.setCount(offer.quantityPerPurchase());
+        editBuffer.setCount(1);
+        editQty = offer.quantityPerPurchase();
         if (priceField != null) priceField.setValue(String.valueOf(offer.priceBronze()));
-        if (qtyField != null) qtyField.setValue(String.valueOf(offer.quantityPerPurchase()));
         refreshEditState();
     }
 
@@ -280,8 +281,11 @@ public class ShopScreen extends AbstractContainerScreen<ShopMenu> {
             g.blit(TEXTURE_PNG, px, topPos, EDIT_UV_U, EDIT_UV_V, EDIT_W, EDIT_H);
             // Fake slot item (x=8, y=15 relative to the trade-edit panel).
             if (!editBuffer.isEmpty()) {
-                g.renderItem(editBuffer, px + 8, topPos + 15);
-                g.renderItemDecorations(font, editBuffer, px + 8, topPos + 15);
+                ItemStack render = editBuffer.copy();
+                render.setCount(Math.max(1, Math.min(64, editQty)));
+                g.renderItem(render, px + 8, topPos + 15);
+                g.renderItemDecorations(font, render,
+                        px + 8, topPos + 15, String.valueOf(editQty));
             }
             // Currency widget below the trade-edit panel.
             int cy = topPos + EDIT_H + 3;
@@ -297,6 +301,7 @@ public class ShopScreen extends AbstractContainerScreen<ShopMenu> {
         if (tab == 1) renderOffers(g, mouseX, mouseY);
 
         if (tab == 0 || tab == 1) renderCurrencyLabels(g);
+        if (tab == 1 && ClientShopState.canEdit()) renderPriceDenominationLabels(g);
 
         renderTooltip(g, mouseX, mouseY);
     }
@@ -315,6 +320,23 @@ public class ShopScreen extends AbstractContainerScreen<ShopMenu> {
         if (extractBtn != null) extractBtn.active = stored > 0;
     }
 
+    /** Draws the live price split (bronze/silver/gold/netherite) above the
+     *  fake-slot in the trade-edit panel. Positioned at (36, 5) relative to
+     *  the widget, matching the original shop.xml. */
+    private void renderPriceDenominationLabels(GuiGraphics g) {
+        long price = parsePrice();
+        long[] split = splitValues(price); // {bronze, silver, gold, netherite}
+        int px = leftPos + CUR_X_OFFSET;
+        int baseX = px + 30;
+        int baseY = topPos + 5;
+        int step = 15;
+        int color = 0x898989;
+        g.drawString(font, String.valueOf(split[0]), baseX, baseY, color, false);
+        g.drawString(font, String.valueOf(split[1]), baseX + step, baseY, color, false);
+        g.drawString(font, String.valueOf(split[2]), baseX + step * 2, baseY, color, false);
+        g.drawString(font, String.valueOf(split[3]), baseX + step * 3, baseY, color, false);
+    }
+
     /** Returns {bronze, silver, gold, netherite} (indices 0..3). */
     private static long[] splitValues(long price) {
         long netherite = price / Currency.NETHERITE.getValue();
@@ -331,7 +353,6 @@ public class ShopScreen extends AbstractContainerScreen<ShopMenu> {
         int baseX = leftPos + OFFERS_X;
         int baseY = topPos + OFFERS_Y;
 
-        // Clip region for the offers list.
         g.enableScissor(baseX, baseY, baseX + OFFERS_W, baseY + OFFERS_H);
 
         int colW = TRADE_BUTTON_W;
@@ -352,6 +373,19 @@ public class ShopScreen extends AbstractContainerScreen<ShopMenu> {
         }
 
         g.disableScissor();
+
+        // Scrollbar on the right edge of the offers region.
+        int contentH = ((offers.size() + 1) / 2) * TRADE_BUTTON_H;
+        if (contentH > OFFERS_H) {
+            int barX = baseX + OFFERS_W - 4;
+            int barY = baseY;
+            int barH = OFFERS_H;
+            g.fill(barX, barY, barX + 4, barY + barH, 0xFF373737);
+            int thumbH = Math.max(8, barH * barH / contentH);
+            int maxScroll = contentH - OFFERS_H;
+            int thumbY = barY + (int) ((barH - thumbH) * (scroll / (float) maxScroll));
+            g.fill(barX, thumbY, barX + 4, thumbY + thumbH, 0xFFAAAAAA);
+        }
     }
 
     private void renderTradeButton(GuiGraphics g, int x, int y, ShopOffer offer,
@@ -415,14 +449,14 @@ public class ShopScreen extends AbstractContainerScreen<ShopMenu> {
                 ItemStack cursor = menu.getCarried();
                 if (!cursor.isEmpty()) {
                     editBuffer = cursor.copy();
-                    editingIndex = -1; // new offer
-                    if (qtyField != null) qtyField.setValue("1");
+                    editingIndex = -1;
+                    editQty = 1;
                     refreshEditState();
                 } else if (!editBuffer.isEmpty()) {
                     editBuffer = ItemStack.EMPTY;
                     editingIndex = -1;
+                    editQty = 1;
                     if (priceField != null) priceField.setValue("");
-                    if (qtyField != null) qtyField.setValue("1");
                     refreshEditState();
                 }
                 return true;
@@ -434,23 +468,34 @@ public class ShopScreen extends AbstractContainerScreen<ShopMenu> {
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
         if (tab == 1) {
-            int totalRows = (ClientShopState.getOffers().size() + 1) / 2;
-            int maxScroll = Math.max(0, totalRows * TRADE_BUTTON_H - OFFERS_H);
-            scroll = Math.max(0, Math.min(maxScroll, scroll - (int) (delta * TRADE_BUTTON_H)));
-            return true;
+            // Scroll on fake-slot → change editQty.
+            int px = leftPos + CUR_X_OFFSET;
+            int bx = px + 8, by = topPos + 15;
+            if (mouseX >= bx && mouseX < bx + 16 && mouseY >= by && mouseY < by + 16
+                    && !editBuffer.isEmpty()) {
+                int step = hasShiftDown() ? editBuffer.getMaxStackSize() : 1;
+                if (hasControlDown()) step = editBuffer.getMaxStackSize() * ShopMenu.STOCK_SIZE;
+                bumpQty(delta > 0 ? step : -step);
+                return true;
+            }
+            // Scroll on offer list region → scroll offers.
+            int baseX = leftPos + OFFERS_X;
+            int baseY = topPos + OFFERS_Y;
+            if (mouseX >= baseX && mouseX < baseX + OFFERS_W
+                    && mouseY >= baseY && mouseY < baseY + OFFERS_H) {
+                int totalRows = (ClientShopState.getOffers().size() + 1) / 2;
+                int maxScroll = Math.max(0, totalRows * TRADE_BUTTON_H - OFFERS_H);
+                scroll = Math.max(0, Math.min(maxScroll, scroll - (int) (delta * TRADE_BUTTON_H)));
+                return true;
+            }
         }
         return super.mouseScrolled(mouseX, mouseY, delta);
     }
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode != 256) {
-            if (priceField != null && priceField.isFocused()) {
-                return priceField.keyPressed(keyCode, scanCode, modifiers) || priceField.canConsumeInput();
-            }
-            if (qtyField != null && qtyField.isFocused()) {
-                return qtyField.keyPressed(keyCode, scanCode, modifiers) || qtyField.canConsumeInput();
-            }
+        if (keyCode != 256 && priceField != null && priceField.isFocused()) {
+            return priceField.keyPressed(keyCode, scanCode, modifiers) || priceField.canConsumeInput();
         }
         return super.keyPressed(keyCode, scanCode, modifiers);
     }

@@ -14,13 +14,15 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 /**
- * Block item for piggy banks. Always unstackable (max stack 1).
- * Shows stored value in tooltip if the piggy bank has contents.
+ * Block item for piggy banks. Stackable up to 64. The stack size is
+ * constrained per-stack by platform-specific mixins (see fabric/forge
+ * PiggyBankStackMixin) which override {@code ItemStack#getMaxStackSize} to
+ * return 1 when the piggy bank holds a stored value.
  */
 public class PiggyBankBlockItem extends BlockItem {
 
     public PiggyBankBlockItem(Block block, Properties properties) {
-        super(block, properties.stacksTo(1));
+        super(block, properties.stacksTo(64));
     }
 
     /**

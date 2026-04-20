@@ -34,21 +34,23 @@ public class ShopMenu extends AbstractContainerMenu {
         this.shop = shop;
         this.stockContainer = shop != null ? new BackedContainer(shop) : new SimpleContainer(STOCK_SIZE);
 
-        // Stock 9x3 — first slot at (8, 17) to match shop.xml.
+        // Stock 9x3 — first slot at (8, 18). One pixel below shop.xml's
+        // original y=17 so items sit inside the cell instead of overlapping
+        // the top border drawn in shop_gui.png.
         for (int row = 0; row < STOCK_ROWS; row++) {
             for (int col = 0; col < STOCK_COLS; col++) {
                 int index = col + row * STOCK_COLS;
-                addSlot(new AutoHidingSlot(stockContainer, index, 8 + col * 18, 17 + row * 18));
+                addSlot(new AutoHidingSlot(stockContainer, index, 8 + col * 18, 18 + row * 18));
             }
         }
-        // Player inventory at (8, 85) + hotbar at (8, 143) — shop.xml coords.
+        // Player inventory at (8, 86) + hotbar at (8, 144) — offset by +1 too.
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
-                addSlot(new Slot(playerInv, col + row * 9 + 9, 8 + col * 18, 85 + row * 18));
+                addSlot(new Slot(playerInv, col + row * 9 + 9, 8 + col * 18, 86 + row * 18));
             }
         }
         for (int col = 0; col < 9; col++) {
-            addSlot(new Slot(playerInv, col, 8 + col * 18, 143));
+            addSlot(new Slot(playerInv, col, 8 + col * 18, 144));
         }
     }
 
