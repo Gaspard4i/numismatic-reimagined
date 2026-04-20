@@ -4,6 +4,9 @@ import dev.architectury.registry.menu.MenuRegistry;
 import dev.gaspard4i.numismatic.NumismaticConstants;
 import dev.gaspard4i.numismatic.client.PurseHudOverlay;
 import dev.gaspard4i.numismatic.client.screen.ShopScreen;
+import dev.gaspard4i.numismatic.client.tooltip.CurrencyTooltipComponent;
+import dev.gaspard4i.numismatic.client.tooltip.CurrencyTooltipData;
+import net.minecraftforge.client.event.RegisterClientTooltipComponentFactoriesEvent;
 import dev.gaspard4i.numismatic.item.MoneyBagItem;
 import dev.gaspard4i.numismatic.item.NumismaticItems;
 import dev.gaspard4i.numismatic.network.ClientCurrencyData;
@@ -34,6 +37,11 @@ public class NumismaticReimaginedForgeClient {
 
             MenuRegistry.registerScreenFactory(ShopRegistry.SHOP_MENU.get(), ShopScreen::new);
         });
+    }
+
+    @SubscribeEvent
+    public static void onRegisterClientTooltipFactories(RegisterClientTooltipComponentFactoriesEvent event) {
+        event.register(CurrencyTooltipData.class, CurrencyTooltipComponent::new);
     }
 
     @Mod.EventBusSubscriber(modid = NumismaticConstants.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)

@@ -2,8 +2,8 @@ package dev.gaspard4i.numismatic.item;
 
 import dev.gaspard4i.numismatic.block.PiggyBankBlock;
 import dev.gaspard4i.numismatic.block.PiggyBankBlockEntity;
+import dev.gaspard4i.numismatic.client.tooltip.CurrencyTooltipData;
 import dev.gaspard4i.numismatic.currency.Currency;
-import dev.gaspard4i.numismatic.currency.CurrencyResolver;
 import dev.gaspard4i.numismatic.currency.PlayerCurrencyManager;
 import dev.gaspard4i.numismatic.network.NumismaticNetworking;
 import net.minecraft.ChatFormatting;
@@ -18,6 +18,7 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
@@ -26,6 +27,7 @@ import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * A money bag that contains a variable amount of currency.
@@ -230,19 +232,18 @@ public class MoneyBagItem extends Item {
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag isAdvanced) {
         long value = getValue(stack);
-        // Always show the value, even for empty bags (0 coins)
-        String totalFormatted = String.format("%,d coins", value);
-        tooltipComponents.add(
-                Component.translatable("tooltip.numismatic_reimagined.money_bag_value", totalFormatted)
-                        .withStyle(ChatFormatting.GOLD)
-        );
-        if (value > 0) {
-            // Show breakdown by denomination
-            String detailed = CurrencyResolver.formatValue(value);
+        if (value <= 0) {
             tooltipComponents.add(
-                    Component.literal("(" + detailed + ")")
-                            .withStyle(ChatFormatting.GRAY)
-            );
+                    Component.translatable("tooltip.numismatic_reimagined.money_bag.empty")
+                            .withStyle(ChatFormatting.GRAY));
         }
+        // Non-empty bags render their split via getTooltipImage (icons).
+    }
+
+    @Override
+    public Optional<TooltipComponent> getTooltipImage(ItemStack stack) {
+        long value = getValue(stack);
+        if (value <= 0) return Optional.empty();
+        return Optional.of(CurrencyTooltipData.ofRawValue(value));
     }
 }

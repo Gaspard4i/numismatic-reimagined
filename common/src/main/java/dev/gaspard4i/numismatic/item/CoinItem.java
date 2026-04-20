@@ -1,7 +1,7 @@
 package dev.gaspard4i.numismatic.item;
 
+import dev.gaspard4i.numismatic.client.tooltip.CurrencyTooltipData;
 import dev.gaspard4i.numismatic.currency.Currency;
-import dev.gaspard4i.numismatic.currency.CurrencyResolver;
 import dev.gaspard4i.numismatic.currency.PlayerCurrencyManager;
 import dev.gaspard4i.numismatic.network.NumismaticNetworking;
 import net.minecraft.ChatFormatting;
@@ -21,6 +21,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -28,6 +29,7 @@ import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Optional;
 
 public class CoinItem extends Item {
 
@@ -161,11 +163,14 @@ public class CoinItem extends Item {
 
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag isAdvanced) {
+        // The coin breakdown is rendered as an image tooltip via
+        // getTooltipImage -> CurrencyTooltipComponent. No text line here.
+    }
+
+    @Override
+    public Optional<TooltipComponent> getTooltipImage(ItemStack stack) {
         long totalValue = getStackValue(stack);
-        String formatted = CurrencyResolver.formatValue(totalValue);
-        tooltipComponents.add(
-                Component.translatable("tooltip.numismatic_reimagined.coin_value", formatted)
-                        .withStyle(ChatFormatting.GOLD)
-        );
+        if (totalValue <= 0) return Optional.empty();
+        return Optional.of(CurrencyTooltipData.ofRawValue(totalValue));
     }
 }
