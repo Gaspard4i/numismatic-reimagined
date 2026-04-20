@@ -1,3 +1,5 @@
+import java.math.BigDecimal
+
 plugins {
     id("dev.architectury.loom")
     id("architectury-plugin")
@@ -44,10 +46,61 @@ tasks.test {
     finalizedBy(tasks.jacocoTestReport)
 }
 
+val jacocoExclusions = listOf(
+    "dev/gaspard4i/numismatic/Numismatic.class",
+    "dev/gaspard4i/numismatic/NumismaticConstants.class",
+    "dev/gaspard4i/numismatic/item/**",
+    "dev/gaspard4i/numismatic/component/**",
+    "dev/gaspard4i/numismatic/block/**",
+    "dev/gaspard4i/numismatic/shop/**",
+    "dev/gaspard4i/numismatic/request/**",
+    "dev/gaspard4i/numismatic/villager/**",
+    "dev/gaspard4i/numismatic/loot/**",
+    "dev/gaspard4i/numismatic/mob/**",
+    "dev/gaspard4i/numismatic/advancement/**",
+    "dev/gaspard4i/numismatic/network/**",
+    "dev/gaspard4i/numismatic/client/**",
+    "dev/gaspard4i/numismatic/command/**",
+    "dev/gaspard4i/numismatic/config/**",
+    "dev/gaspard4i/numismatic/mixin/**",
+    "dev/gaspard4i/numismatic/currency/PlayerCurrencyManager*.class",
+    "dev/gaspard4i/numismatic/currency/CurrencyNotifications*.class"
+)
+
 tasks.jacocoTestReport {
     dependsOn(tasks.test)
     reports {
         xml.required.set(true)
         html.required.set(true)
     }
+    classDirectories.setFrom(
+        files(classDirectories.files.map {
+            fileTree(it) { exclude(jacocoExclusions) }
+        })
+    )
+}
+
+tasks.jacocoTestCoverageVerification {
+    dependsOn(tasks.test)
+    classDirectories.setFrom(
+        files(classDirectories.files.map {
+            fileTree(it) { exclude(jacocoExclusions) }
+        })
+    )
+    violationRules {
+        rule {
+            limit {
+                counter = "INSTRUCTION"
+                minimum = BigDecimal("0.96")
+            }
+            limit {
+                counter = "BRANCH"
+                minimum = BigDecimal("0.90")
+            }
+        }
+    }
+}
+
+tasks.check {
+    dependsOn(tasks.jacocoTestCoverageVerification)
 }

@@ -11,5 +11,7 @@ public final class Numismatic {
 
     public static void init() {
         LOGGER.info("Loading {} common initialization", NumismaticConstants.MOD_NAME);
+        dev.gaspard4i.numismatic.component.NumismaticDataComponents.register();
+        dev.gaspard4i.numismatic.item.NumismaticItems.register();
     }
 }
