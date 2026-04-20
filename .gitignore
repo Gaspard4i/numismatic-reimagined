@@ -40,7 +40,8 @@ gradle-local.properties
 CLAUDE.md
 .clinerules/
 
-# Markdown : tracker README et CHANGELOG uniquement
+# Markdown : tracker README, CHANGELOG, TESTING uniquement
 *.md
 !README.md
 !CHANGELOG.md
+!TESTING.md
