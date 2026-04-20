@@ -62,8 +62,9 @@ public class ShopScreen extends AbstractContainerScreen<ShopMenu> {
     // pixels lower than the original 54-tall widget to account for netherite row.
     private static final int EXTRACT_REL_X = 4, EXTRACT_REL_Y = 53;
 
-    // Trade-edit widget (owner, tab=1). User extended to 100px wide (added a column).
-    private static final int EDIT_UV_U = 15, EDIT_UV_V = 169, EDIT_W = 100, EDIT_H = 54;
+    // Trade-edit widget (owner, tab=1). Width 99 (x=15..113 in shop_gui.png).
+    // Anything past x=113 is a neighbour widget in the atlas (not part of the panel).
+    private static final int EDIT_UV_U = 15, EDIT_UV_V = 169, EDIT_W = 99, EDIT_H = 54;
     private static final int SUBMIT_UV_U = 15, SUBMIT_UV_V = 223, SUBMIT_W = 41, SUBMIT_H = 10;
     private static final int DELETE_UV_U = 56, DELETE_UV_V = 223;
 
@@ -279,6 +280,13 @@ public class ShopScreen extends AbstractContainerScreen<ShopMenu> {
         } else if (tab == 1 && ClientShopState.canEdit()) {
             // Trade-edit at the top of the right column.
             g.blit(TEXTURE_PNG, px, topPos, EDIT_UV_U, EDIT_UV_V, EDIT_W, EDIT_H);
+
+            // The panel has a 12px-tall "placeholder zone" (yellow/black hatching)
+            // at y=36..47 where the save/delete buttons sit. The actual button
+            // sprites are only 10px tall, so paint over the hatching with the
+            // panel's body colour before the buttons draw on top.
+            g.fill(px + 5, topPos + 35, px + 96, topPos + 48, 0xFFC6C6C6);
+
             // Fake slot item (x=8, y=15 relative to the trade-edit panel).
             if (!editBuffer.isEmpty()) {
                 ItemStack render = editBuffer.copy();
@@ -303,6 +311,17 @@ public class ShopScreen extends AbstractContainerScreen<ShopMenu> {
         if (tab == 0 || tab == 1) renderCurrencyLabels(g);
         if (tab == 1 && ClientShopState.canEdit()) renderPriceDenominationLabels(g);
 
+        // Trade-button tooltip drawn last so it sits on top of every other
+        // offer row in the grid (offers are drawn top→bottom so without this
+        // the tooltip of an early offer gets clipped by later offers).
+        if (tab == 1) {
+            int hovered = offerAtCursor(mouseX, mouseY);
+            if (hovered >= 0) {
+                ShopOffer offer = ClientShopState.getOffers().get(hovered);
+                if (offer != null) g.renderTooltip(font, offer.template(), mouseX, mouseY);
+            }
+        }
+
         renderTooltip(g, mouseX, mouseY);
     }
 
@@ -320,21 +339,21 @@ public class ShopScreen extends AbstractContainerScreen<ShopMenu> {
         if (extractBtn != null) extractBtn.active = stored > 0;
     }
 
-    /** Draws the live price split (bronze/silver/gold/netherite) above the
-     *  fake-slot in the trade-edit panel. Positioned at (36, 5) relative to
-     *  the widget, matching the original shop.xml. */
+    /** Draws the live price split next to each denomination icon drawn into
+     *  the trade-edit panel background (bronze/silver/gold/netherite).
+     *  Icon centres in shop_gui.png sit at x=50/65/80/95 relative to the
+     *  panel; the label goes just after (+7 px). */
     private void renderPriceDenominationLabels(GuiGraphics g) {
         long price = parsePrice();
         long[] split = splitValues(price); // {bronze, silver, gold, netherite}
         int px = leftPos + CUR_X_OFFSET;
-        int baseX = px + 30;
-        int baseY = topPos + 5;
-        int step = 15;
-        int color = 0x898989;
-        g.drawString(font, String.valueOf(split[0]), baseX, baseY, color, false);
-        g.drawString(font, String.valueOf(split[1]), baseX + step, baseY, color, false);
-        g.drawString(font, String.valueOf(split[2]), baseX + step * 2, baseY, color, false);
-        g.drawString(font, String.valueOf(split[3]), baseX + step * 3, baseY, color, false);
+        int baseY = topPos + 4;
+        int color = 0x404040;
+        int[] iconX = { 40, 55, 70, 85 }; // after-icon label anchors
+        g.drawString(font, String.valueOf(split[0]), px + iconX[0], baseY, color, false);
+        g.drawString(font, String.valueOf(split[1]), px + iconX[1], baseY, color, false);
+        g.drawString(font, String.valueOf(split[2]), px + iconX[2], baseY, color, false);
+        g.drawString(font, String.valueOf(split[3]), px + iconX[3], baseY, color, false);
     }
 
     /** Returns {bronze, silver, gold, netherite} (indices 0..3). */
@@ -390,29 +409,41 @@ public class ShopScreen extends AbstractContainerScreen<ShopMenu> {
 
     private void renderTradeButton(GuiGraphics g, int x, int y, ShopOffer offer,
                                    int mouseX, int mouseY, int index) {
+        boolean selected = ClientStackEquals(editBuffer, offer.template());
         boolean hovered = mouseX >= x && mouseX < x + TRADE_BUTTON_W
                 && mouseY >= y && mouseY < y + TRADE_BUTTON_H;
-        boolean selected = ClientStackEquals(editBuffer, offer.template());
 
         int bg = selected ? 0x60A0E060 : (hovered ? 0x40808080 : 0);
         if (bg != 0) g.fill(x, y, x + TRADE_BUTTON_W, y + TRADE_BUTTON_H, bg);
 
-        // Icon.
         ItemStack icon = offer.template().copy();
         icon.setCount(offer.quantityPerPurchase());
         g.renderItem(icon, x + 4, y + 2);
         g.renderItemDecorations(font, icon, x + 4, y + 2);
 
-        // Arrow.
         g.blit(TEXTURE_PNG, x + 26, y + 7, ARROW_UV_U, ARROW_UV_V, ARROW_W, ARROW_H);
 
-        // Price label.
         String priceStr = String.valueOf(offer.priceBronze());
         g.drawString(font, priceStr, x + 36, y + 7, 0xFFFFFF, true);
+    }
 
-        if (hovered) {
-            g.renderTooltip(font, offer.template(), mouseX, mouseY);
+    /** Finds the offer currently under the mouse pointer in the offers grid,
+     *  or -1. Used to delay tooltip rendering until after all buttons are drawn. */
+    private int offerAtCursor(int mouseX, int mouseY) {
+        int baseX = leftPos + OFFERS_X;
+        int baseY = topPos + OFFERS_Y;
+        if (mouseX < baseX || mouseX >= baseX + OFFERS_W
+                || mouseY < baseY || mouseY >= baseY + OFFERS_H) return -1;
+        OfferList offers = ClientShopState.getOffers();
+        for (int i = 0; i < offers.size(); i++) {
+            int col = i % 2;
+            int row = i / 2;
+            int x = baseX + col * (TRADE_BUTTON_W + 4);
+            int y = baseY + row * TRADE_BUTTON_H - scroll;
+            if (mouseX >= x && mouseX < x + TRADE_BUTTON_W
+                    && mouseY >= y && mouseY < y + TRADE_BUTTON_H) return i;
         }
+        return -1;
     }
 
     private static boolean ClientStackEquals(ItemStack a, ItemStack b) {
