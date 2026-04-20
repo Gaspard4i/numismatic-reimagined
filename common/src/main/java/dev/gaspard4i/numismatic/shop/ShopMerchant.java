@@ -43,8 +43,19 @@ public class ShopMerchant implements Merchant {
 
     private MerchantOffer toMerchantOffer(ShopOffer offer) {
         long price = offer.priceBronze();
-        ItemStack payment = priceAsSingleCoinStack(price);
-        if (payment == null) payment = MoneyBagItem.createWithValue(price);
+        // Decompose the price into up to two coin stacks (MerchantOffer allows
+        // a primary + secondary buy item). If it doesn't fit, fall back to a
+        // single money bag tagged with the exact value — buyer must have that
+        // exact bag (limitation inherited from the original mod).
+        ItemStack[] costs = priceAsTwoCoinStacks(price);
+        ItemStack primary;
+        ItemStack secondary = ItemStack.EMPTY;
+        if (costs != null) {
+            primary = costs[0];
+            secondary = costs[1];
+        } else {
+            primary = MoneyBagItem.createWithValue(price);
+        }
 
         int maxUses = shop.isAdmin()
                 ? Integer.MAX_VALUE
@@ -52,19 +63,35 @@ public class ShopMerchant implements Merchant {
                     ? shop.countMatchingItems(offer.template()) / offer.quantityPerPurchase()
                     : 0);
 
-        return new MerchantOffer(payment, offer.createPurchasedStack(), maxUses, 0, 0);
+        return new MerchantOffer(primary, secondary,
+                offer.createPurchasedStack(), maxUses, 0, 0);
     }
 
+    /**
+     * Tries to split {@code price} into at most two coin stacks of one
+     * denomination each (each stack ≤ 64). Returns {@code null} if more than
+     * two denominations are needed or either count exceeds 64.
+     */
     @Nullable
-    private static ItemStack priceAsSingleCoinStack(long price) {
+    private static ItemStack[] priceAsTwoCoinStacks(long price) {
+        long remaining = price;
+        ItemStack first = ItemStack.EMPTY;
+        ItemStack second = ItemStack.EMPTY;
+
         for (Currency c : Currency.valuesDescending()) {
             if (c.getValue() == 0) continue;
-            if (price % c.getValue() != 0) continue;
-            long count = price / c.getValue();
-            if (count <= 0 || count > 64) continue;
-            return new ItemStack(NumismaticItems.getCoinItem(c), (int) count);
+            long count = remaining / c.getValue();
+            if (count <= 0) continue;
+            if (count > 64) return null; // single denomination too big
+            ItemStack s = new ItemStack(NumismaticItems.getCoinItem(c), (int) count);
+            if (first.isEmpty()) first = s;
+            else if (second.isEmpty()) second = s;
+            else return null; // 3rd denomination needed
+            remaining -= count * c.getValue();
+            if (remaining == 0) break;
         }
-        return null;
+        if (remaining != 0 || first.isEmpty()) return null;
+        return new ItemStack[]{ first, second };
     }
 
     @Override public void setTradingPlayer(@Nullable Player customer) { this.customer = customer; }
@@ -88,11 +115,11 @@ public class ShopMerchant implements Merchant {
                     break;
                 }
             }
-            refreshOffers();
-            if (customer instanceof ServerPlayer sp) {
-                sp.connection.send(new ClientboundMerchantOffersPacket(
-                        sp.containerMenu.containerId, offers, 0, 0, false, false));
-            }
+            // Do NOT rebuild the offers list here — that would reset `uses`
+            // on every trade and make vanilla think stock is infinite, causing
+            // client-side rollbacks on shift-click. Instead the offer's `uses`
+            // counter (incremented above) is compared against maxUses, which
+            // we set to current_stock / qty_per_purchase at offer creation.
         }
     }
 

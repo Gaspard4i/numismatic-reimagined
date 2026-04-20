@@ -140,7 +140,8 @@ public class ShopScreen extends AbstractContainerScreen<ShopMenu> {
 
             priceField = new EditBox(font, ex + 35, ey + 18, 47, 11, Component.empty());
             priceField.setMaxLength(7);
-            priceField.setBordered(false);
+            priceField.setBordered(true);
+            priceField.setTextColor(0xFFFFFF);
             priceField.setFilter(s -> s.matches("\\d*"));
             priceField.setResponder(s -> refreshEditState());
             addRenderableWidget(priceField);
@@ -437,9 +438,35 @@ public class ShopScreen extends AbstractContainerScreen<ShopMenu> {
         ClientShopState.clear();
     }
 
+    @Override
+    protected boolean hasClickedOutside(double mouseX, double mouseY, int guiLeft, int guiTop, int mouseButton) {
+        // The side panels (tabs + currency + trade-edit) sit outside the
+        // background rectangle. Without this override vanilla treats clicks
+        // on them as "outside" and drops the carried stack on the floor.
+        if (tab == 1 && ClientShopState.canEdit()) {
+            int ex = leftPos + CUR_X_OFFSET;
+            int ey = topPos + CUR_H + 3;
+            // Trade-edit panel bounds (full 100x54 region).
+            if (mouseX >= ex && mouseX < ex + EDIT_W
+                    && mouseY >= ey && mouseY < ey + EDIT_H) return false;
+        }
+        // Currency widget area.
+        int cx = leftPos + CUR_X_OFFSET;
+        if (mouseX >= cx && mouseX < cx + CUR_W
+                && mouseY >= topPos && mouseY < topPos + CUR_H) return false;
+        // Tab buttons area.
+        int tx = leftPos + TAB_X_OFFSET;
+        if (mouseX >= tx && mouseX < tx + TAB_W
+                && mouseY >= topPos + TAB_Y0 && mouseY < topPos + TAB_Y1 + TAB_H) return false;
+        return super.hasClickedOutside(mouseX, mouseY, guiLeft, guiTop, mouseButton);
+    }
+
     public void refreshAfterStateSync() {
-        // Called when server pushes a SYNC_SHOP_STATE packet.
-        if (submitBtn != null || deleteBtn != null) refreshEditState();
+        // Called when server pushes a SYNC_SHOP_STATE packet. At init() time
+        // the client may not yet know the player is the owner (packet hasn't
+        // arrived), so the tabs + currency widget are missing until the first
+        // sync. Rebuild widgets to reflect the now-known canEdit/isAdmin.
+        rebuildUI();
     }
 
     // -------- Inner widgets --------
