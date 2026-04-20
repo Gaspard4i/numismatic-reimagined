@@ -100,6 +100,25 @@ public final class ShopRegistry {
     /** Alias — legacy admin code referenced this separately. */
     public static final RegistrySupplier<BlockEntityType<ShopBlockEntity>> ADMIN_SHOP_BLOCK_ENTITY = SHOP_BLOCK_ENTITY;
 
+    // ----- Reverse shop (request board) -----
+
+    public static final RegistrySupplier<Block> REQUEST_BOARD = BLOCKS.register("request_board",
+            () -> new RequestBoardBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.WOOD)
+                    .strength(2.0f, 4.0f)
+                    .sound(SoundType.WOOD)
+                    .noOcclusion()
+                    .pushReaction(PushReaction.BLOCK)));
+
+    public static final RegistrySupplier<Item> REQUEST_BOARD_ITEM = BLOCK_ITEMS.register("request_board",
+            () -> new BlockItem(REQUEST_BOARD.get(), new Item.Properties()));
+
+    @SuppressWarnings("ConstantConditions")
+    public static final RegistrySupplier<BlockEntityType<RequestBoardBlockEntity>> REQUEST_BOARD_BLOCK_ENTITY =
+            BLOCK_ENTITIES.register("request_board",
+                    () -> BlockEntityType.Builder.of(RequestBoardBlockEntity::new,
+                            REQUEST_BOARD.get()).build(null));
+
     public static void register() {
         BLOCKS.register();
         BLOCK_ITEMS.register();

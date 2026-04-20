@@ -96,6 +96,8 @@ subprojects {
                     "dev/gaspard4i/numismatic/shop/ShopMenu*.class",
                     "dev/gaspard4i/numismatic/shop/ShopMerchant*.class",
                     "dev/gaspard4i/numismatic/shop/ShopRegistry*.class",
+                    "dev/gaspard4i/numismatic/shop/RequestBoardBlock*.class",
+                    "dev/gaspard4i/numismatic/shop/RequestBoardBlockEntity*.class",
                     "dev/gaspard4i/numismatic/shop/ShopPaymentHelper*.class",
                     // Items (besoin Player + ItemStack vivant)
                     "dev/gaspard4i/numismatic/item/CoinItem*.class",

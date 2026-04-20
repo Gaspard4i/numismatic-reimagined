@@ -1,5 +1,7 @@
 package dev.gaspard4i.numismatic.command;
 
+import com.mojang.brigadier.arguments.BoolArgumentType;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import dev.architectury.event.events.common.CommandRegistrationEvent;
@@ -8,14 +10,24 @@ import dev.gaspard4i.numismatic.currency.CurrencyResolver;
 import dev.gaspard4i.numismatic.currency.PlayerCurrencyManager;
 import dev.gaspard4i.numismatic.item.MoneyBagItem;
 import dev.gaspard4i.numismatic.network.NumismaticNetworking;
+import dev.gaspard4i.numismatic.shop.RequestBoardBlockEntity;
+import dev.gaspard4i.numismatic.shop.RequestFulfillLogic;
+import dev.gaspard4i.numismatic.shop.RequestOffer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -92,6 +104,22 @@ public final class NumismaticCommands {
                                         .then(Commands.argument("amount", LongArgumentType.longArg(1))
                                                 .executes(NumismaticCommands::giveBagAmount)
                                         )
+                                )
+                                .then(Commands.literal("request")
+                                        .then(Commands.literal("fund")
+                                                .then(Commands.argument("amount", LongArgumentType.longArg(1))
+                                                        .executes(NumismaticCommands::requestFund)))
+                                        .then(Commands.literal("add")
+                                                .then(Commands.argument("qty", IntegerArgumentType.integer(1))
+                                                        .then(Commands.argument("price", LongArgumentType.longArg(1))
+                                                                .executes(NumismaticCommands::requestAddLoose)
+                                                                .then(Commands.argument("strictNbt", BoolArgumentType.bool())
+                                                                        .executes(NumismaticCommands::requestAdd)))))
+                                        .then(Commands.literal("remove")
+                                                .then(Commands.argument("index", IntegerArgumentType.integer(0))
+                                                        .executes(NumismaticCommands::requestRemove)))
+                                        .then(Commands.literal("deliver")
+                                                .executes(NumismaticCommands::requestDeliver))
                                 )
                 )
         );
@@ -298,6 +326,169 @@ public final class NumismaticCommands {
         String formatted = formatBalance(amount);
         context.getSource().sendSuccess(() ->
                 Component.translatable("command.numismatic_reimagined.give_bag", formatted)
+                        .withStyle(ChatFormatting.GREEN), false);
+        return 1;
+    }
+
+    // ---------------- Request Board (reverse shop) ----------------
+
+    /** Ray-cast from the player's eyes for the request board they are looking at. */
+    private static RequestBoardBlockEntity lookedAtBoard(ServerPlayer player) {
+        Vec3 eye = player.getEyePosition(1.0f);
+        Vec3 end = eye.add(player.getLookAngle().scale(5.0));
+        BlockHitResult hit = player.serverLevel().clip(new ClipContext(eye, end,
+                ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, player));
+        if (hit == null || hit.getType() == HitResult.Type.MISS) return null;
+        BlockPos pos = hit.getBlockPos();
+        BlockEntity be = player.serverLevel().getBlockEntity(pos);
+        return be instanceof RequestBoardBlockEntity board ? board : null;
+    }
+
+    private static int requestFund(CommandContext<CommandSourceStack> context) {
+        ServerPlayer sp = context.getSource().getPlayer();
+        if (sp == null) return 0;
+        long amount = LongArgumentType.getLong(context, "amount");
+        RequestBoardBlockEntity board = lookedAtBoard(sp);
+        if (board == null) {
+            context.getSource().sendFailure(
+                    Component.translatable("command.numismatic_reimagined.request.no_board"));
+            return 0;
+        }
+        if (!board.isOwner(sp)) {
+            context.getSource().sendFailure(
+                    Component.translatable("command.numismatic_reimagined.request.not_owner"));
+            return 0;
+        }
+        PlayerCurrencyManager mgr = PlayerCurrencyManager.get(sp.server.overworld());
+        if (!mgr.subtractBalance(sp.getUUID(), amount)) {
+            context.getSource().sendFailure(Component.literal("Insufficient purse balance"));
+            return 0;
+        }
+        NumismaticNetworking.syncToClient(sp, mgr);
+        board.addFunds(amount);
+        context.getSource().sendSuccess(() ->
+                Component.translatable("command.numismatic_reimagined.request.fund",
+                        String.format("%,d", amount)).withStyle(ChatFormatting.GREEN), false);
+        return 1;
+    }
+
+    private static int requestAddLoose(CommandContext<CommandSourceStack> context) {
+        return requestAddImpl(context, false);
+    }
+
+    private static int requestAdd(CommandContext<CommandSourceStack> context) {
+        boolean strict = BoolArgumentType.getBool(context, "strictNbt");
+        return requestAddImpl(context, strict);
+    }
+
+    private static int requestAddImpl(CommandContext<CommandSourceStack> context, boolean strictNbt) {
+        ServerPlayer sp = context.getSource().getPlayer();
+        if (sp == null) return 0;
+        ItemStack held = sp.getMainHandItem();
+        if (held.isEmpty()) {
+            context.getSource().sendFailure(Component.literal("Hold the template item in your main hand"));
+            return 0;
+        }
+        int qty = IntegerArgumentType.getInteger(context, "qty");
+        long price = LongArgumentType.getLong(context, "price");
+        RequestBoardBlockEntity board = lookedAtBoard(sp);
+        if (board == null) {
+            context.getSource().sendFailure(
+                    Component.translatable("command.numismatic_reimagined.request.no_board"));
+            return 0;
+        }
+        if (!board.isOwner(sp)) {
+            context.getSource().sendFailure(
+                    Component.translatable("command.numismatic_reimagined.request.not_owner"));
+            return 0;
+        }
+        ItemStack template = held.copy();
+        template.setCount(1);
+        RequestOffer offer = new RequestOffer(template, qty, 0, price, strictNbt);
+        if (board.getOffers().add(offer) < 0) {
+            context.getSource().sendFailure(Component.literal("Board is full"));
+            return 0;
+        }
+        board.setChanged();
+        context.getSource().sendSuccess(() ->
+                Component.translatable("command.numismatic_reimagined.request.add",
+                        template.getHoverName().getString(), qty, price)
+                        .withStyle(ChatFormatting.GREEN), false);
+        return 1;
+    }
+
+    private static int requestRemove(CommandContext<CommandSourceStack> context) {
+        ServerPlayer sp = context.getSource().getPlayer();
+        if (sp == null) return 0;
+        int index = IntegerArgumentType.getInteger(context, "index");
+        RequestBoardBlockEntity board = lookedAtBoard(sp);
+        if (board == null) {
+            context.getSource().sendFailure(
+                    Component.translatable("command.numismatic_reimagined.request.no_board"));
+            return 0;
+        }
+        if (!board.isOwner(sp)) {
+            context.getSource().sendFailure(
+                    Component.translatable("command.numismatic_reimagined.request.not_owner"));
+            return 0;
+        }
+        if (!board.getOffers().remove(index)) {
+            context.getSource().sendFailure(Component.literal("Invalid index"));
+            return 0;
+        }
+        board.setChanged();
+        context.getSource().sendSuccess(() ->
+                Component.translatable("command.numismatic_reimagined.request.remove", index)
+                        .withStyle(ChatFormatting.GREEN), false);
+        return 1;
+    }
+
+    /** Looks for the first offer the held stack can fulfill and applies it. */
+    private static int requestDeliver(CommandContext<CommandSourceStack> context) {
+        ServerPlayer sp = context.getSource().getPlayer();
+        if (sp == null) return 0;
+        ItemStack held = sp.getMainHandItem();
+        if (held.isEmpty()) {
+            context.getSource().sendFailure(Component.literal("Hold the item to deliver"));
+            return 0;
+        }
+        RequestBoardBlockEntity board = lookedAtBoard(sp);
+        if (board == null) {
+            context.getSource().sendFailure(
+                    Component.translatable("command.numismatic_reimagined.request.no_board"));
+            return 0;
+        }
+        int matchIndex = -1;
+        RequestFulfillLogic.FulfillResult result = null;
+        for (int i = 0; i < board.getOffers().asList().size(); i++) {
+            RequestOffer offer = board.getOffers().asList().get(i);
+            RequestFulfillLogic.FulfillResult r =
+                    RequestFulfillLogic.fulfill(held, offer, board.getFunds());
+            if (!r.isNone()) { matchIndex = i; result = r; break; }
+        }
+        if (result == null) {
+            context.getSource().sendFailure(
+                    Component.translatable("command.numismatic_reimagined.request.no_match"));
+            return 0;
+        }
+        // Deduct fund + store items.
+        board.tryWithdrawFunds(result.payout());
+        ItemStack stored = held.copy();
+        stored.setCount(result.consumed());
+        int slot = board.firstEmptySlot();
+        if (slot >= 0) board.setItem(slot, stored);
+        else sp.drop(stored, false); // board full → drop back
+        held.shrink(result.consumed());
+        board.getOffers().replace(matchIndex, result.updatedOffer());
+        board.setChanged();
+        PlayerCurrencyManager mgr = PlayerCurrencyManager.get(sp.server.overworld());
+        mgr.addBalance(sp.getUUID(), result.payout());
+        NumismaticNetworking.syncToClient(sp, mgr);
+        final int consumed = result.consumed();
+        final long payout = result.payout();
+        context.getSource().sendSuccess(() ->
+                Component.translatable("command.numismatic_reimagined.request.fulfilled",
+                        consumed, String.format("%,d", payout))
                         .withStyle(ChatFormatting.GREEN), false);
         return 1;
     }
