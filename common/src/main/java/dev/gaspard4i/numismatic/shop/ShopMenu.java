@@ -1,5 +1,7 @@
 package dev.gaspard4i.numismatic.shop;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -9,9 +11,9 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Vanilla container menu for the shop. Always exposes the 27 stock slots +
- * the player's inventory; the client-side {@code ShopScreen} hides or
- * disables them based on the active tab (Offers / Stock / Test).
+ * Container menu for the shop. 27 stock slots are hidden in tab=1 (offers)
+ * via {@link AutoHidingSlot}. Matches the layout and slot coordinates of
+ * wisp-forest/numismatic-overhaul/ShopScreenHandler.
  */
 public class ShopMenu extends AbstractContainerMenu {
 
@@ -21,9 +23,8 @@ public class ShopMenu extends AbstractContainerMenu {
 
     @Nullable
     private final ShopBlockEntity shop;
-    private final SimpleContainer stockContainer;
+    private final Container stockContainer;
 
-    /** Factory used by the registered MenuType (client side). */
     public ShopMenu(int containerId, Inventory playerInv) {
         this(containerId, playerInv, null);
     }
@@ -33,29 +34,25 @@ public class ShopMenu extends AbstractContainerMenu {
         this.shop = shop;
         this.stockContainer = shop != null ? new BackedContainer(shop) : new SimpleContainer(STOCK_SIZE);
 
-        // Stock 9x3
+        // Stock 9x3 — first slot at (8, 17) to match shop.xml.
         for (int row = 0; row < STOCK_ROWS; row++) {
             for (int col = 0; col < STOCK_COLS; col++) {
                 int index = col + row * STOCK_COLS;
-                addSlot(new Slot(stockContainer, index, 8 + col * 18, 18 + row * 18));
+                addSlot(new AutoHidingSlot(stockContainer, index, 8 + col * 18, 17 + row * 18));
             }
         }
-        // Player inventory
+        // Player inventory at (8, 85) + hotbar at (8, 143) — shop.xml coords.
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
-                addSlot(new Slot(playerInv, col + row * 9 + 9, 8 + col * 18, 84 + row * 18));
+                addSlot(new Slot(playerInv, col + row * 9 + 9, 8 + col * 18, 85 + row * 18));
             }
         }
-        // Hotbar
         for (int col = 0; col < 9; col++) {
-            addSlot(new Slot(playerInv, col, 8 + col * 18, 142));
+            addSlot(new Slot(playerInv, col, 8 + col * 18, 143));
         }
     }
 
-    @Nullable
-    public ShopBlockEntity getShop() {
-        return shop;
-    }
+    @Nullable public ShopBlockEntity getShop() { return shop; }
 
     @Override
     public ItemStack quickMoveStack(Player player, int index) {
@@ -84,6 +81,22 @@ public class ShopMenu extends AbstractContainerMenu {
                 shop.getBlockPos().getZ() + 0.5) < 64.0;
     }
 
+    /** Stock slot disabled (hidden) when {@code ShopScreen} is on tab 1 (offers). */
+    public static final class AutoHidingSlot extends Slot {
+        public AutoHidingSlot(Container inv, int index, int x, int y) {
+            super(inv, index, x, y);
+        }
+
+        @Override
+        public boolean isActive() {
+            var screen = Minecraft.getInstance().screen;
+            if (screen instanceof dev.gaspard4i.numismatic.client.screen.ShopScreen s) {
+                return s.currentTab() == 0;
+            }
+            return true;
+        }
+    }
+
     /** Server-side container forwarding to the BE's stock list. */
     private static final class BackedContainer extends SimpleContainer {
         private final ShopBlockEntity shop;
@@ -93,21 +106,18 @@ public class ShopMenu extends AbstractContainerMenu {
             this.shop = shop;
         }
 
-        @Override
-        public ItemStack getItem(int slot) {
+        @Override public ItemStack getItem(int slot) {
             return slot >= 0 && slot < shop.getStock().size() ? shop.getStock().get(slot) : ItemStack.EMPTY;
         }
 
-        @Override
-        public void setItem(int slot, ItemStack stack) {
+        @Override public void setItem(int slot, ItemStack stack) {
             if (slot >= 0 && slot < shop.getStock().size()) {
                 shop.getStock().set(slot, stack);
                 setChanged();
             }
         }
 
-        @Override
-        public ItemStack removeItem(int slot, int amount) {
+        @Override public ItemStack removeItem(int slot, int amount) {
             ItemStack s = getItem(slot);
             if (s.isEmpty()) return ItemStack.EMPTY;
             int take = Math.min(amount, s.getCount());
@@ -118,16 +128,12 @@ public class ShopMenu extends AbstractContainerMenu {
             return out;
         }
 
-        @Override
-        public ItemStack removeItemNoUpdate(int slot) {
+        @Override public ItemStack removeItemNoUpdate(int slot) {
             ItemStack s = getItem(slot);
             shop.getStock().set(slot, ItemStack.EMPTY);
             return s;
         }
 
-        @Override
-        public void setChanged() {
-            shop.setChanged();
-        }
+        @Override public void setChanged() { shop.setChanged(); }
     }
 }
