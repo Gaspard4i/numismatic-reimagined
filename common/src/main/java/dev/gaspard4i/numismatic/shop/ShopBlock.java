@@ -99,7 +99,24 @@ public class ShopBlock extends BaseEntityBlock {
         if (level.isClientSide()) return InteractionResult.SUCCESS;
         BlockEntity be = level.getBlockEntity(pos);
         if (be instanceof ShopBlockEntity shop) {
-            player.openMenu(shop);
+            // Owner + no-sneak → owner UI (ShopScreen).
+            // Owner + sneak OR non-owner → vanilla merchant trade UI (like the original mod).
+            if (shop.canEdit(player) && !player.isShiftKeyDown()) {
+                player.openMenu(shop);
+                if (player instanceof net.minecraft.server.level.ServerPlayer sp) {
+                    dev.gaspard4i.numismatic.network.NumismaticNetworking.syncShopState(sp, shop);
+                }
+            } else {
+                ShopMerchant merchant = new ShopMerchant(shop);
+                merchant.refreshOffers();
+                merchant.setTradingPlayer(player);
+                merchant.openTradingScreen(player,
+                        net.minecraft.network.chat.Component.translatable(
+                                shop.isAdmin()
+                                        ? "block.numismatic_reimagined.admin_shop_block"
+                                        : "block.numismatic_reimagined.shop_block"),
+                        0);
+            }
             return InteractionResult.CONSUME;
         }
         return InteractionResult.PASS;
