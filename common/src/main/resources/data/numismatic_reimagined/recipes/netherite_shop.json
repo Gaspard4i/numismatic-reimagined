@@ -1,13 +1,12 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "NGN",
-    "GXG",
-    "NGN"
+    "NNN",
+    "NXN",
+    "NNN"
   ],
   "key": {
     "N": { "item": "numismatic_reimagined:netherite_coin" },
-    "G": { "item": "numismatic_reimagined:gold_coin" },
     "X": { "item": "numismatic_reimagined:shop_block" }
   },
   "result": {

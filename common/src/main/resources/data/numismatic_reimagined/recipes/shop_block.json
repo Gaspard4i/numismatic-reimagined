@@ -1,15 +1,13 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "BSB",
-    "PCP",
-    "PPP"
+    "GGG",
+    "GXG",
+    "GGG"
   ],
   "key": {
-    "B": { "item": "numismatic_reimagined:bronze_coin" },
-    "S": { "item": "minecraft:smooth_stone_slab" },
-    "P": { "tag": "minecraft:planks" },
-    "C": { "item": "minecraft:chest" }
+    "G": { "item": "numismatic_reimagined:gold_coin" },
+    "X": { "item": "numismatic_reimagined:silver_shop" }
   },
   "result": {
     "item": "numismatic_reimagined:shop_block",

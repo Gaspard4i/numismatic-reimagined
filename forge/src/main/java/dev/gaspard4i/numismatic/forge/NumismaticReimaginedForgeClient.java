@@ -6,8 +6,11 @@ import dev.gaspard4i.numismatic.NumismaticConstants;
 import dev.gaspard4i.numismatic.client.PurseHudOverlay;
 import dev.gaspard4i.numismatic.client.PurseKeybindState;
 import dev.gaspard4i.numismatic.client.render.ShopBlockEntityRenderer;
+import dev.gaspard4i.numismatic.client.render.ShopTint;
 import dev.gaspard4i.numismatic.client.screen.ShopScreen;
+import dev.gaspard4i.numismatic.shop.ShopTier;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
+import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 import dev.gaspard4i.numismatic.client.tooltip.CurrencyTooltipComponent;
 import dev.gaspard4i.numismatic.client.tooltip.CurrencyTooltipData;
 import net.minecraft.client.KeyMapping;
@@ -51,6 +54,22 @@ public class NumismaticReimaginedForgeClient {
     @SubscribeEvent
     public static void onRegisterClientTooltipFactories(RegisterClientTooltipComponentFactoriesEvent event) {
         event.register(CurrencyTooltipData.class, CurrencyTooltipComponent::new);
+    }
+
+    @SubscribeEvent
+    public static void onRegisterBlockColors(RegisterColorHandlersEvent.Block event) {
+        for (ShopTier tier : ShopTier.values()) {
+            event.register((state, level, pos, tintIndex) -> ShopTint.forBlockState(state, tintIndex),
+                    ShopRegistry.block(tier).get());
+        }
+    }
+
+    @SubscribeEvent
+    public static void onRegisterItemColors(RegisterColorHandlersEvent.Item event) {
+        for (ShopTier tier : ShopTier.values()) {
+            event.register((stack, tintIndex) -> ShopTint.forItemStack(stack, tintIndex),
+                    ShopRegistry.blockItem(tier).get());
+        }
     }
 
     public static final KeyMapping OPEN_PURSE_KEY = new KeyMapping(

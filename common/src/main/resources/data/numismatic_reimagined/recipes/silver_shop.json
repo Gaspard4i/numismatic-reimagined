@@ -1,13 +1,12 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "SBS",
-    "BXB",
-    "SBS"
+    "SSS",
+    "SXS",
+    "SSS"
   ],
   "key": {
     "S": { "item": "numismatic_reimagined:silver_coin" },
-    "B": { "tag": "minecraft:planks" },
     "X": { "item": "numismatic_reimagined:bronze_shop" }
   },
   "result": {

@@ -6,7 +6,10 @@ import dev.gaspard4i.numismatic.NumismaticConstants;
 import dev.gaspard4i.numismatic.client.PurseHudOverlay;
 import dev.gaspard4i.numismatic.client.PurseKeybindState;
 import dev.gaspard4i.numismatic.client.render.ShopBlockEntityRenderer;
+import dev.gaspard4i.numismatic.client.render.ShopTint;
 import dev.gaspard4i.numismatic.client.screen.ShopScreen;
+import dev.gaspard4i.numismatic.shop.ShopTier;
+import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import dev.gaspard4i.numismatic.client.tooltip.CurrencyTooltipComponent;
 import dev.gaspard4i.numismatic.client.tooltip.CurrencyTooltipData;
@@ -40,6 +43,16 @@ public class NumismaticReimaginedFabricClient implements ClientModInitializer {
 
         // Render the current offer as a floating hologram above the shop plate.
         BlockEntityRenderers.register(ShopRegistry.SHOP_BLOCK_ENTITY.get(), ShopBlockEntityRenderer::new);
+
+        // Per-tier shop tint (plate faces get tintindex=0 in the model).
+        for (ShopTier tier : ShopTier.values()) {
+            ColorProviderRegistry.BLOCK.register(
+                    (state, level, pos, tintIndex) -> ShopTint.forBlockState(state, tintIndex),
+                    ShopRegistry.block(tier).get());
+            ColorProviderRegistry.ITEM.register(
+                    (stack, tintIndex) -> ShopTint.forItemStack(stack, tintIndex),
+                    ShopRegistry.blockItem(tier).get());
+        }
 
         // Custom tooltip: coin/money-bag show icon+count stack
         TooltipComponentCallback.EVENT.register(data ->
