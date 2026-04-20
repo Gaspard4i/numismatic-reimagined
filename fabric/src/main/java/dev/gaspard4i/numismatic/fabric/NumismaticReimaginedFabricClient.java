@@ -1,10 +1,8 @@
 package dev.gaspard4i.numismatic.fabric;
 
-import com.mojang.blaze3d.platform.InputConstants;
 import dev.architectury.registry.menu.MenuRegistry;
 import dev.gaspard4i.numismatic.NumismaticConstants;
 import dev.gaspard4i.numismatic.client.PurseHudOverlay;
-import dev.gaspard4i.numismatic.client.PurseKeybindState;
 import dev.gaspard4i.numismatic.client.render.ShopBlockEntityRenderer;
 import dev.gaspard4i.numismatic.client.screen.ShopScreen;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
@@ -17,12 +15,8 @@ import dev.gaspard4i.numismatic.item.NumismaticItems;
 import dev.gaspard4i.numismatic.network.ClientCurrencyData;
 import dev.gaspard4i.numismatic.shop.ShopRegistry;
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
-import net.minecraft.client.KeyMapping;
 import net.minecraft.client.renderer.item.ItemProperties;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
 public class NumismaticReimaginedFabricClient implements ClientModInitializer {
@@ -54,17 +48,5 @@ public class NumismaticReimaginedFabricClient implements ClientModInitializer {
         HudRenderCallback.EVENT.register((guiGraphics, tickDelta) ->
                 PurseHudOverlay.render(guiGraphics, tickDelta)
         );
-
-        // Keybind: P → open purse popup
-        KeyMapping openPurseKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
-                "key.numismatic_reimagined.open_purse",
-                InputConstants.Type.KEYSYM,
-                InputConstants.KEY_P,
-                "key.categories.inventory"));
-        ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            while (openPurseKey.consumeClick()) {
-                PurseKeybindState.openPurseScreen();
-            }
-        });
     }
 }

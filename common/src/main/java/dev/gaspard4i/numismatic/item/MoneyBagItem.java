@@ -232,18 +232,9 @@ public class MoneyBagItem extends Item {
         tag.putLong(TAG_VALUE, value);
     }
 
-    @Override
-    public Component getName(ItemStack stack) {
-        long value = getValue(stack);
-        int tier = getTier(value);
-        String key = switch (tier) {
-            case 1 -> "item.numismatic_reimagined.money_bag.silver";
-            case 2 -> "item.numismatic_reimagined.money_bag.gold";
-            case 3 -> "item.numismatic_reimagined.money_bag.netherite";
-            default -> "item.numismatic_reimagined.money_bag";
-        };
-        return Component.translatable(key);
-    }
+    // Name is the plain "Money Bag" translation — the bag's value is
+    // conveyed by the coin-icon tooltip, not the item name, to match
+    // the upstream mod.
 
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag isAdvanced) {
