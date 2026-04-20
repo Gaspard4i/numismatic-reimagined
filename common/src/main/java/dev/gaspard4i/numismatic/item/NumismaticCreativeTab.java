@@ -7,10 +7,16 @@ import dev.gaspard4i.numismatic.NumismaticConstants;
 import dev.gaspard4i.numismatic.block.PiggyBankBlocks;
 import dev.gaspard4i.numismatic.block.PiggyBankTier;
 import dev.gaspard4i.numismatic.currency.Currency;
+import dev.gaspard4i.numismatic.request.RequestBoardBlocks;
+import dev.gaspard4i.numismatic.shop.NumismaticShops;
+import dev.gaspard4i.numismatic.shop.ShopTier;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ItemLike;
+
+import java.util.function.Supplier;
 
 public final class NumismaticCreativeTab {
 
@@ -21,32 +27,36 @@ public final class NumismaticCreativeTab {
 
     public static final RegistrySupplier<CreativeModeTab> MAIN = TABS.register(
             "main",
-            () -> CreativeTabRegistry.create(
-                    Component.translatable("itemGroup.numismatic_reimagined"),
-                    () -> new ItemStack(NumismaticItems.GOLD_COIN.get())
+            () -> CreativeTabRegistry.create(builder -> builder
+                    .title(Component.translatable("itemGroup.numismatic_reimagined"))
+                    .icon(() -> new ItemStack(NumismaticItems.GOLD_COIN.get()))
+                    .displayItems((params, output) -> {
+                        add(output, NumismaticItems.BRONZE_COIN);
+                        add(output, NumismaticItems.SILVER_COIN);
+                        add(output, NumismaticItems.GOLD_COIN);
+                        add(output, NumismaticItems.NETHERITE_COIN);
+                        add(output, NumismaticItems.MONEY_BAG);
+                        add(output, () -> PiggyBankBlocks.blockFor(PiggyBankTier.BASE));
+                        add(output, () -> PiggyBankBlocks.blockFor(PiggyBankTier.GOLDEN));
+                        add(output, () -> PiggyBankBlocks.blockFor(PiggyBankTier.NETHERITE));
+                        add(output, () -> NumismaticShops.blockFor(ShopTier.BRONZE));
+                        add(output, () -> NumismaticShops.blockFor(ShopTier.SILVER));
+                        add(output, () -> NumismaticShops.blockFor(ShopTier.GOLD));
+                        add(output, () -> NumismaticShops.blockFor(ShopTier.NETHERITE));
+                        add(output, () -> NumismaticShops.blockFor(ShopTier.ADMIN));
+                        add(output, RequestBoardBlocks.REQUEST_BOARD);
+                        add(output, NumismaticItems.STAR_COIN);
+                    })
             )
     );
 
-    public static void registerContents() {
-        // Architectury 13 uses MODIFY_ENTRIES_ALL for adding items; the simplest
-        // approach for a small tab is to populate it via Fabric-style builder.
-        CreativeTabRegistry.appendStack(
-                MAIN,
-                new ItemStack(NumismaticItems.BRONZE_COIN.get()),
-                new ItemStack(NumismaticItems.SILVER_COIN.get()),
-                new ItemStack(NumismaticItems.GOLD_COIN.get()),
-                new ItemStack(NumismaticItems.NETHERITE_COIN.get()),
-                new ItemStack(NumismaticItems.MONEY_BAG.get()),
-                new ItemStack(PiggyBankBlocks.blockFor(PiggyBankTier.BASE)),
-                new ItemStack(PiggyBankBlocks.blockFor(PiggyBankTier.GOLDEN)),
-                new ItemStack(PiggyBankBlocks.blockFor(PiggyBankTier.NETHERITE))
-        );
-        // Silence unused warning while keeping reference for future dynamic colors.
-        var _unused = Currency.BRONZE;
+    private static void add(CreativeModeTab.Output output, Supplier<? extends ItemLike> supplier) {
+        output.accept(new ItemStack(supplier.get()));
     }
 
     public static void register() {
         TABS.register();
-        registerContents();
+        // Silence unused warning while keeping reference for future dynamic colors.
+        var _unused = Currency.BRONZE;
     }
 }

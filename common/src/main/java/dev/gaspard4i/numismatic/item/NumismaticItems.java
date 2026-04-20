@@ -29,6 +29,11 @@ public final class NumismaticItems {
             () -> new MoneyBagItem(new Item.Properties())
     );
 
+    public static final RegistrySupplier<Item> STAR_COIN = ITEMS.register(
+            "star_coin",
+            () -> new StarCoinItem(new Item.Properties())
+    );
+
     private static RegistrySupplier<Item> registerCoin(Currency currency, String id) {
         RegistrySupplier<Item> supplier = ITEMS.register(
                 id,

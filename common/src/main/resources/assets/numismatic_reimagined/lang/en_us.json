@@ -6,10 +6,18 @@
   "item.numismatic_reimagined.gold_coin": "Gold Coin",
   "item.numismatic_reimagined.netherite_coin": "Netherite Coin",
   "item.numismatic_reimagined.money_bag": "Money Bag",
+  "item.numismatic_reimagined.star_coin": "Star Coin",
 
   "block.numismatic_reimagined.piggy_bank": "Piggy Bank",
   "block.numismatic_reimagined.golden_piggy_bank": "Golden Piggy Bank",
   "block.numismatic_reimagined.netherite_piggy_bank": "Netherite Piggy Bank",
+
+  "block.numismatic_reimagined.bronze_shop": "Bronze Shop",
+  "block.numismatic_reimagined.silver_shop": "Silver Shop",
+  "block.numismatic_reimagined.gold_shop": "Gold Shop",
+  "block.numismatic_reimagined.netherite_shop": "Netherite Shop",
+  "block.numismatic_reimagined.admin_shop": "Admin Shop",
+  "block.numismatic_reimagined.request_board": "Request Board",
 
   "gui.numismatic_reimagined.purse": "Purse",
   "gui.numismatic_reimagined.purse.extract": "Extract"
