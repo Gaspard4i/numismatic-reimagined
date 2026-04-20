@@ -101,18 +101,18 @@ public class CoinItem extends Item {
     }
 
     /**
-     * When this coin stack is placed ON another item (right-click in inventory).
-     * Any coin/bag combination (same or different type) merges into a money bag.
+     * Coin on slot (cursor=this coin, slot=other):
+     * Left click: if the slot holds another coin/bag, merge everything into a
+     * money bag placed in the slot. The cursor stack is consumed.
      */
     @Override
     public boolean overrideStackedOnOther(ItemStack thisStack, Slot slot, ClickAction action, Player player) {
-        if (action != ClickAction.SECONDARY) return false;
+        if (action != ClickAction.PRIMARY) return false;
         ItemStack other = slot.getItem();
         if (other.isEmpty()) return false;
 
         long thisValue = getStackValue(thisStack);
         long otherValue;
-
         if (other.getItem() instanceof CoinItem otherCoin) {
             otherValue = otherCoin.getStackValue(other);
         } else if (other.getItem() instanceof MoneyBagItem) {
@@ -120,7 +120,6 @@ public class CoinItem extends Item {
         } else {
             return false;
         }
-
         if (thisValue <= 0) return false;
 
         ItemStack bag = MoneyBagItem.createWithValue(thisValue + otherValue);
@@ -130,18 +129,17 @@ public class CoinItem extends Item {
     }
 
     /**
-     * When another item is placed ON this coin stack (right-click in inventory).
-     * Any coin/bag combination (same or different type) merges into a money bag.
+     * Coin/bag on this coin (cursor=other, slot=this coin):
+     * Left click: merge everything into a money bag placed in the slot.
      */
     @Override
     public boolean overrideOtherStackedOnMe(ItemStack thisStack, ItemStack other, Slot slot, ClickAction action,
                                              Player player, SlotAccess access) {
-        if (action != ClickAction.SECONDARY) return false;
+        if (action != ClickAction.PRIMARY) return false;
         if (other.isEmpty()) return false;
 
         long thisValue = getStackValue(thisStack);
         long otherValue;
-
         if (other.getItem() instanceof CoinItem otherCoin) {
             otherValue = otherCoin.getStackValue(other);
         } else if (other.getItem() instanceof MoneyBagItem) {
@@ -149,11 +147,7 @@ public class CoinItem extends Item {
         } else {
             return false;
         }
-
-        if (otherValue <= 0 && !(other.getItem() instanceof MoneyBagItem)) {
-            // Allow merging with empty money bags (they still count as mergeable)
-            if (thisValue <= 0) return false;
-        }
+        if (thisValue + otherValue <= 0) return false;
 
         ItemStack bag = MoneyBagItem.createWithValue(thisValue + otherValue);
         slot.set(bag);

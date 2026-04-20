@@ -163,57 +163,76 @@ public class MoneyBagItem extends Item {
     }
 
     /**
-     * When this money bag is placed ON another item (right-click in inventory).
-     * Merges with coins or other money bags.
+     * Bag (cursor) on top of coin/bag (slot):
+     * <ul>
+     *   <li>Left click → absorb slot content into the cursor bag.</li>
+     *   <li>Right click with empty slot is a no-op (standard extract uses
+     *       the opposite override).</li>
+     * </ul>
      */
     @Override
     public boolean overrideStackedOnOther(ItemStack thisStack, Slot slot, ClickAction action, Player player) {
-        if (action != ClickAction.SECONDARY) return false;
+        if (action != ClickAction.PRIMARY) return false;
         ItemStack other = slot.getItem();
         if (other.isEmpty()) return false;
 
         long thisValue = getValue(thisStack);
-        long otherValue;
-
-        if (other.getItem() instanceof CoinItem otherCoin) {
-            otherValue = otherCoin.getStackValue(other);
+        long merged;
+        if (other.getItem() instanceof CoinItem coin) {
+            merged = MoneyBagClickLogic.absorbCoins(thisValue, coin.getCurrency(), other.getCount());
         } else if (other.getItem() instanceof MoneyBagItem) {
-            otherValue = getValue(other);
+            merged = MoneyBagClickLogic.absorbBag(thisValue, getValue(other));
         } else {
             return false;
         }
 
-        ItemStack bag = createWithValue(thisValue + otherValue);
-        slot.set(bag);
-        thisStack.shrink(1);
+        setValue(thisStack, merged);
+        slot.set(ItemStack.EMPTY);
         return true;
     }
 
     /**
-     * When another item is placed ON this money bag (right-click in inventory).
-     * Merges with coins or other money bags.
+     * Coin/bag (cursor) on top of bag (slot):
+     * <ul>
+     *   <li>Left click with coin/bag cursor → absorb cursor into slot bag.</li>
+     *   <li>Right click with empty cursor → extract largest denomination as
+     *       a coin stack onto the cursor.</li>
+     * </ul>
      */
     @Override
     public boolean overrideOtherStackedOnMe(ItemStack thisStack, ItemStack other, Slot slot, ClickAction action,
                                              Player player, SlotAccess access) {
-        if (action != ClickAction.SECONDARY) return false;
-        if (other.isEmpty()) return false;
+        if (action == ClickAction.SECONDARY && other.isEmpty()) {
+            long bagValue = getValue(thisStack);
+            MoneyBagClickLogic.ExtractResult r = MoneyBagClickLogic.extractLargestDenom(bagValue);
+            if (r.isEmpty()) return false;
+            setValue(thisStack, r.remainingBagValue());
+            ItemStack extracted = new ItemStack(NumismaticItems.getCoinItem(r.currency()), r.count());
+            access.set(extracted);
+            return true;
+        }
+
+        if (action != ClickAction.PRIMARY || other.isEmpty()) return false;
 
         long thisValue = getValue(thisStack);
-        long otherValue;
-
-        if (other.getItem() instanceof CoinItem otherCoin) {
-            otherValue = otherCoin.getStackValue(other);
+        long merged;
+        if (other.getItem() instanceof CoinItem coin) {
+            merged = MoneyBagClickLogic.absorbCoins(thisValue, coin.getCurrency(), other.getCount());
         } else if (other.getItem() instanceof MoneyBagItem) {
-            otherValue = getValue(other);
+            merged = MoneyBagClickLogic.absorbBag(thisValue, getValue(other));
         } else {
             return false;
         }
 
-        ItemStack bag = createWithValue(thisValue + otherValue);
-        slot.set(bag);
+        setValue(thisStack, merged);
         access.set(ItemStack.EMPTY);
         return true;
+    }
+
+    /** Mutates an existing money bag stack's stored value in-place. */
+    private static void setValue(ItemStack stack, long value) {
+        CompoundTag tag = stack.getOrCreateTag();
+        tag.putLong(TAG_VALUE, value);
     }
 
     @Override
