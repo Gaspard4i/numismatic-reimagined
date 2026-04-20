@@ -48,14 +48,23 @@ public class ShopScreen extends AbstractContainerScreen<ShopMenu> {
     private static final int TAB_Y0 = 5;
     private static final int TAB_Y1 = 37; // TAB_Y0 + 28 + 4 margin-bottom
 
-    // Currency widget (right column).
-    private static final int CUR_UV_U = 146, CUR_UV_V = 169, CUR_W = 34, CUR_H = 54;
+    // Currency widget (right column). 4-denomination layout custom-built by
+    // the user — netherite/gold/silver/bronze top→bottom, widget 34x66.
+    // Source: shop_gui.png x=146..179, y=169..234.
+    private static final int CUR_UV_U = 146, CUR_UV_V = 169, CUR_W = 34, CUR_H = 66;
     private static final int CUR_X_OFFSET = BG_W + 2; // right-column padding-left 2
-    private static final int EXTRACT_UV_U = 146, EXTRACT_UV_V = 224, EXTRACT_W = 26, EXTRACT_H = 8;
 
-    // Trade-edit widget (owner, tab=1).
-    private static final int EDIT_UV_U = 15, EDIT_UV_V = 169, EDIT_W = 98, EDIT_H = 54;
-    private static final int SUBMIT_UV_U = 15, SUBMIT_UV_V = 223, SUBMIT_W = 41, SUBMIT_H = 11;
+    // Extract button sits below the widget frame (the grey zone at y=222..229
+    // inside the widget is drawn-over by this button at runtime).
+    // Button UV starts at (146, 237) with 26x8 size + hover variant at v+8.
+    private static final int EXTRACT_UV_U = 146, EXTRACT_UV_V = 237, EXTRACT_W = 26, EXTRACT_H = 8;
+    // Position relative to the widget top-left: same as original (4, 53) — 12
+    // pixels lower than the original 54-tall widget to account for netherite row.
+    private static final int EXTRACT_REL_X = 4, EXTRACT_REL_Y = 53;
+
+    // Trade-edit widget (owner, tab=1). User extended to 100px wide (added a column).
+    private static final int EDIT_UV_U = 15, EDIT_UV_V = 169, EDIT_W = 100, EDIT_H = 54;
+    private static final int SUBMIT_UV_U = 15, SUBMIT_UV_V = 223, SUBMIT_W = 41, SUBMIT_H = 10;
     private static final int DELETE_UV_U = 56, DELETE_UV_V = 223;
 
     // Offer-container region (tab=1). Absolute (8, 10), 160x60.
@@ -114,7 +123,7 @@ public class ShopScreen extends AbstractContainerScreen<ShopMenu> {
         // --- Currency widget extract button (owner only)
         if (owner && !ClientShopState.isAdmin()) {
             extractBtn = addRenderableWidget(new TexturedButton(
-                    leftPos + CUR_X_OFFSET + 4, topPos + 41,
+                    leftPos + CUR_X_OFFSET + EXTRACT_REL_X, topPos + EXTRACT_REL_Y,
                     EXTRACT_W, EXTRACT_H, EXTRACT_UV_U, EXTRACT_UV_V,
                     TEXTURE_PNG,
                     b -> {
@@ -246,11 +255,13 @@ public class ShopScreen extends AbstractContainerScreen<ShopMenu> {
 
     private void renderCurrencyLabels(GuiGraphics g) {
         long stored = ClientShopState.getRevenue();
-        long[] split = splitValues(stored);
+        long[] split = splitValues(stored); // {bronze, silver, gold, netherite}
         int cx = leftPos + CUR_X_OFFSET + 5;
-        g.drawString(font, String.valueOf(split[2]), cx, topPos + 7, 0x404040, false);  // gold
-        g.drawString(font, String.valueOf(split[1]), cx, topPos + 19, 0x404040, false); // silver
-        g.drawString(font, String.valueOf(split[0]), cx, topPos + 31, 0x404040, false); // bronze
+        // Labels are 12px apart starting at y=7; top to bottom: netherite, gold, silver, bronze.
+        g.drawString(font, String.valueOf(split[3]), cx, topPos + 7, 0x404040, false);  // netherite
+        g.drawString(font, String.valueOf(split[2]), cx, topPos + 19, 0x404040, false); // gold
+        g.drawString(font, String.valueOf(split[1]), cx, topPos + 31, 0x404040, false); // silver
+        g.drawString(font, String.valueOf(split[0]), cx, topPos + 43, 0x404040, false); // bronze
         if (extractBtn != null) extractBtn.active = stored > 0;
     }
 
@@ -261,21 +272,26 @@ public class ShopScreen extends AbstractContainerScreen<ShopMenu> {
         int ex = leftPos + CUR_X_OFFSET;
         int ey = topPos + CUR_H + 3;
         int color = 0x898989;
-        // Position absolute (36, 5), widths 12/12/18 margin-left 8 between each.
-        int baseX = ex + 36;
+        // Row of 4 small labels above the fake-slot: bronze / silver / gold / netherite
+        // (left→right, smallest→biggest denomination). Widget width is 100, spacing tight.
+        int baseX = ex + 30;
         int baseY = ey + 5;
+        int step = 15;
         g.drawString(font, String.valueOf(split[0]), baseX, baseY, color, false);
-        g.drawString(font, String.valueOf(split[1]), baseX + 12 + 8, baseY, color, false);
-        g.drawString(font, String.valueOf(split[2]), baseX + 12 + 8 + 12 + 8, baseY, color, false);
+        g.drawString(font, String.valueOf(split[1]), baseX + step, baseY, color, false);
+        g.drawString(font, String.valueOf(split[2]), baseX + step * 2, baseY, color, false);
+        g.drawString(font, String.valueOf(split[3]), baseX + step * 3, baseY, color, false);
     }
 
-    /** Returns {bronze, silver, gold} (indices 0..2). */
+    /** Returns {bronze, silver, gold, netherite} (indices 0..3). */
     private static long[] splitValues(long price) {
-        long gold = price / Currency.GOLD.getValue();
-        long rest = price % Currency.GOLD.getValue();
+        long netherite = price / Currency.NETHERITE.getValue();
+        long rest = price % Currency.NETHERITE.getValue();
+        long gold = rest / Currency.GOLD.getValue();
+        rest %= Currency.GOLD.getValue();
         long silver = rest / Currency.SILVER.getValue();
         long bronze = rest % Currency.SILVER.getValue();
-        return new long[]{ bronze, silver, gold };
+        return new long[]{ bronze, silver, gold, netherite };
     }
 
     private void renderOffers(GuiGraphics g, int mouseX, int mouseY) {
