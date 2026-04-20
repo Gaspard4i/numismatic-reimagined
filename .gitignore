@@ -35,11 +35,12 @@ gradle-local.properties
 # Architectury
 .architectury-transformer/
 
-# Claude
+# Claude — local only, ne jamais push
 .claude/
+CLAUDE.md
+.clinerules/
 
-# Markdown : tracker README, CLAUDE.md, CHANGELOG.md uniquement
+# Markdown : tracker README et CHANGELOG uniquement
 *.md
 !README.md
-!CLAUDE.md
 !CHANGELOG.md

@@ -8,7 +8,8 @@
   "license": "MIT",
   "environment": "*",
   "entrypoints": {
-    "main": ["dev.gaspard4i.numismatic.fabric.NumismaticFabric"]
+    "main": ["dev.gaspard4i.numismatic.fabric.NumismaticFabric"],
+    "client": ["dev.gaspard4i.numismatic.fabric.NumismaticFabricClient"]
   },
   "accessWidener": "numismatic_reimagined.accesswidener",
   "depends": {

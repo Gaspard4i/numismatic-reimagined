@@ -13,5 +13,6 @@ public final class Numismatic {
         LOGGER.info("Loading {} common initialization", NumismaticConstants.MOD_NAME);
         dev.gaspard4i.numismatic.component.NumismaticDataComponents.register();
         dev.gaspard4i.numismatic.item.NumismaticItems.register();
+        dev.gaspard4i.numismatic.network.NumismaticNetworking.register();
     }
 }
