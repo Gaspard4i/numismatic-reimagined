@@ -50,6 +50,19 @@ Java 17 requis. JDK Microsoft 17+ recommandé.
 - `forge/` — entrypoint, mixins, intégration Forge
 - Tests unitaires JUnit 5 + Mockito + JaCoCo (seuil 96% enforcement)
 
+## Compatibilité
+
+- **JEI / REI / EMI** : les recipes de crafting (shops, piggy banks, request board)
+  utilisent `minecraft:crafting_shaped` vanilla et sont donc auto-détectées par
+  tous les plugins de recipe viewer majeurs. Pas de category custom, pas de
+  plugin à installer.
+- **Items tiers** : les shops et le request board acceptent n'importe quel item
+  de n'importe quel mod (tout passe par `ItemStack.isSameItemSameTags` de
+  vanilla). Mode "strict NBT" disponible pour les items uniques/enchantés.
+- **Forge + Fabric** : aucune différence fonctionnelle. Les items, leurs NBT,
+  le mécanisme d'achat/vente, la money bag, tout marche identiquement sur les
+  deux loaders via Architectury API 9.x.
+
 ## Crédits
 
 Inspiré et basé sur :
