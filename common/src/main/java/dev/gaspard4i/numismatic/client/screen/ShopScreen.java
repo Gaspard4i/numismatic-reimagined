@@ -215,7 +215,7 @@ public class ShopScreen extends AbstractContainerScreen<ShopMenu> {
 
     private int maxQty() {
         if (editBuffer.isEmpty()) return 1;
-        return editBuffer.getMaxStackSize() * ShopMenu.STOCK_SIZE;
+        return editBuffer.getMaxStackSize();
     }
 
     private void bumpQty(int delta) {
@@ -473,8 +473,7 @@ public class ShopScreen extends AbstractContainerScreen<ShopMenu> {
             int bx = px + 8, by = topPos + 15;
             if (mouseX >= bx && mouseX < bx + 16 && mouseY >= by && mouseY < by + 16
                     && !editBuffer.isEmpty()) {
-                int step = hasShiftDown() ? editBuffer.getMaxStackSize() : 1;
-                if (hasControlDown()) step = editBuffer.getMaxStackSize() * ShopMenu.STOCK_SIZE;
+                int step = hasShiftDown() ? 8 : 1;
                 bumpQty(delta > 0 ? step : -step);
                 return true;
             }
