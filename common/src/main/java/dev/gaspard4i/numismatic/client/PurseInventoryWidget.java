@@ -70,8 +70,14 @@ public class PurseInventoryWidget extends AbstractWidget {
     public boolean isPopupOpen() { return popupOpen; }
 
     /** Geometry accessors so {@code mouseClicked} can route clicks. */
-    private int popupLeft() { return getX() - PANEL_W - 4; }
-    private int popupTop()  { return getY(); }
+    private int popupLeft() {
+        // Upstream mod uses margins(left=-30, top=15) relative to the button.
+        // Our button sits at (leftPos+152, topPos+6) — offset matching the
+        // button position so the popup sits just under-left of the icon
+        // and doesn't overflow the screen.
+        return getX() - 30;
+    }
+    private int popupTop()  { return getY() + 15; }
     private int rowY(int i) { return popupTop() + ROW_Y0 + i * ROW_HEIGHT; }
     private int plusX()  { return popupLeft() + PLUS_X; }
     private int minusX() { return popupLeft() + PLUS_X; }

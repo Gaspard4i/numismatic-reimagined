@@ -159,8 +159,15 @@ public class CoinItem extends Item {
 
     @Override
     public Optional<TooltipComponent> getTooltipImage(ItemStack stack) {
+        // A pure coin stack already shows its own icon + name + count in
+        // the vanilla tooltip header — the denomination image would only
+        // duplicate that. Only render the breakdown tooltip when the raw
+        // value spans multiple denominations (e.g. a 150-bronze stack
+        // shown as 1S + 50B, which can't happen on a single-item stack).
         long totalValue = getStackValue(stack);
         if (totalValue <= 0) return Optional.empty();
-        return Optional.of(CurrencyTooltipData.ofRawValue(totalValue));
+        CurrencyTooltipData data = CurrencyTooltipData.ofRawValue(totalValue);
+        if (data.activeLines() <= 1) return Optional.empty();
+        return Optional.of(data);
     }
 }
