@@ -107,7 +107,9 @@ public class MoneyBagItem extends Item {
 
     @Override
     public Rarity getRarity(ItemStack stack) {
-        return getRarityForValue(getValue(stack));
+        // Keep the name color neutral (COMMON). Tier visuals are conveyed
+        // by the icon texture + the tooltip icons, not by rarity coloring.
+        return Rarity.COMMON;
     }
 
     @Override

@@ -42,16 +42,16 @@ public class ShopMenu extends AbstractContainerMenu {
         int rows = Math.max(1, size / STOCK_COLS);
         int cols = STOCK_COLS;
 
-        // Stock grid : rows×9, starting at (8, 17) — matches shop.xml of
-        // the upstream mod exactly. The +1 offset used previously pushed
-        // items outside their cell.
+        // Stock grid : rows×9, starting at (8, 18). The PNG has its dark
+        // border at y=17 and the cell interior at y=18..33, so the slot
+        // Y must be 18 for the hover square to sit inside the cell.
         for (int row = 0; row < rows; row++) {
             for (int col = 0; col < cols; col++) {
                 int index = col + row * cols;
-                addSlot(new AutoHidingSlot(stockContainer, index, 8 + col * 18, 17 + row * 18));
+                addSlot(new AutoHidingSlot(stockContainer, index, 8 + col * 18, 18 + row * 18));
             }
         }
-        int invY = 17 + rows * 18 + 14;
+        int invY = 18 + rows * 18 + 13;
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
                 addSlot(new Slot(playerInv, col + row * 9 + 9, 8 + col * 18, invY + row * 18));

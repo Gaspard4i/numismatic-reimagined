@@ -51,7 +51,14 @@ public final class NumismaticItems {
                         output.accept(new ItemStack(GOLD_COIN.get()));
                         output.accept(new ItemStack(NETHERITE_COIN.get()));
                         output.accept(new ItemStack(STAR_COIN.get()));
+                        // Empty money bag + one of each tier (so every
+                        // texture variant + icon is discoverable in the
+                        // creative tab).
                         output.accept(MoneyBagItem.createWithValue(0));
+                        output.accept(MoneyBagItem.createWithValue(50));          // bronze tier
+                        output.accept(MoneyBagItem.createWithValue(5_000));       // silver tier
+                        output.accept(MoneyBagItem.createWithValue(500_000));     // gold tier
+                        output.accept(MoneyBagItem.createWithValue(50_000_000));  // netherite tier
                         output.accept(new ItemStack(NumismaticBlocks.PIGGY_BANK_ITEM.get()));
                         output.accept(new ItemStack(NumismaticBlocks.GOLDEN_PIGGY_BANK_ITEM.get()));
                         output.accept(new ItemStack(NumismaticBlocks.NETHERITE_PIGGY_BANK_ITEM.get()));

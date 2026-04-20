@@ -145,8 +145,9 @@ public class ShopScreen extends AbstractContainerScreen<ShopMenu> {
         int px = leftPos + CUR_X_OFFSET;
 
         if (tab == 0) {
-            // Tab 0 = stock : currency widget + withdraw button at the top of the right column.
-            if (owner && !ClientShopState.isAdmin()) {
+            // Tab 0 = stock : currency widget + withdraw button at the top.
+            // Button always visible (even greyed) so the UI stays stable.
+            if (owner) {
                 extractBtn = addRenderableWidget(new TexturedButton(
                         px + EXTRACT_REL_X, topPos + EXTRACT_REL_Y,
                         EXTRACT_W, EXTRACT_H, EXTRACT_UV_U, EXTRACT_UV_V,
@@ -155,7 +156,7 @@ public class ShopScreen extends AbstractContainerScreen<ShopMenu> {
                             BlockPos pos = ClientShopState.getPos();
                             if (pos != null) NumismaticNetworking.sendWithdrawRevenue(pos);
                         }));
-                extractBtn.active = ClientShopState.getRevenue() > 0;
+                extractBtn.active = !ClientShopState.isAdmin() && ClientShopState.getRevenue() > 0;
             }
         } else if (tab == 1 && owner) {
             // Tab 1 = offers : trade-edit at the top (matching shop.xml layout),
@@ -181,18 +182,17 @@ public class ShopScreen extends AbstractContainerScreen<ShopMenu> {
                     px + 50, ey + 36, SUBMIT_W, SUBMIT_H, DELETE_UV_U, SUBMIT_UV_V,
                     TEXTURE_PNG, b -> onDelete()));
 
-            // Currency widget in the bottom half of the right panel.
-            if (!ClientShopState.isAdmin()) {
-                extractBtn = addRenderableWidget(new TexturedButton(
-                        px + EXTRACT_REL_X, topPos + EDIT_H + 3 + EXTRACT_REL_Y,
-                        EXTRACT_W, EXTRACT_H, EXTRACT_UV_U, EXTRACT_UV_V,
-                        TEXTURE_PNG,
-                        b -> {
-                            BlockPos pos = ClientShopState.getPos();
-                            if (pos != null) NumismaticNetworking.sendWithdrawRevenue(pos);
-                        }));
-                extractBtn.active = ClientShopState.getRevenue() > 0;
-            }
+            // Currency widget extract button always visible (greyed for admin
+            // or when revenue is zero).
+            extractBtn = addRenderableWidget(new TexturedButton(
+                    px + EXTRACT_REL_X, topPos + EDIT_H + 3 + EXTRACT_REL_Y,
+                    EXTRACT_W, EXTRACT_H, EXTRACT_UV_U, EXTRACT_UV_V,
+                    TEXTURE_PNG,
+                    b -> {
+                        BlockPos pos = ClientShopState.getPos();
+                        if (pos != null) NumismaticNetworking.sendWithdrawRevenue(pos);
+                    }));
+            extractBtn.active = !ClientShopState.isAdmin() && ClientShopState.getRevenue() > 0;
 
             refreshEditState();
         }
@@ -360,15 +360,23 @@ public class ShopScreen extends AbstractContainerScreen<ShopMenu> {
     private void renderCurrencyLabels(GuiGraphics g) {
         long stored = ClientShopState.getRevenue();
         long[] split = splitValues(stored); // {bronze, silver, gold, netherite}
-        int cx = leftPos + CUR_X_OFFSET + 5;
+        int panelX = leftPos + CUR_X_OFFSET;
         int cy0 = (tab == 1) ? topPos + EDIT_H + 3 : topPos;
-        // Labels are 12px apart starting at y=7 relative to the widget top;
-        // top to bottom: netherite, gold, silver, bronze.
-        g.drawString(font, String.valueOf(split[3]), cx, cy0 + 7, 0x404040, false);
-        g.drawString(font, String.valueOf(split[2]), cx, cy0 + 19, 0x404040, false);
-        g.drawString(font, String.valueOf(split[1]), cx, cy0 + 31, 0x404040, false);
-        g.drawString(font, String.valueOf(split[0]), cx, cy0 + 43, 0x404040, false);
+        // The widget reserves x=3..24 as the text area (dark), with the
+        // coin icon painted inside the PNG at x=25..32. We right-align
+        // numbers to x=22 (panelX + 22) so they never touch the coin.
+        int rightAnchor = panelX + 22;
+        drawRightAligned(g, String.valueOf(split[3]), rightAnchor, cy0 + 7);   // netherite
+        drawRightAligned(g, String.valueOf(split[2]), rightAnchor, cy0 + 19);  // gold
+        drawRightAligned(g, String.valueOf(split[1]), rightAnchor, cy0 + 31);  // silver
+        drawRightAligned(g, String.valueOf(split[0]), rightAnchor, cy0 + 43);  // bronze
         if (extractBtn != null) extractBtn.active = stored > 0;
+    }
+
+    /** Right-aligns text ending exactly at the given anchor X. */
+    private void drawRightAligned(GuiGraphics g, String text, int anchorRight, int y) {
+        int width = font.width(text);
+        g.drawString(font, text, anchorRight - width, y, 0xFFFFFF, false);
     }
 
     /** Draws the live price split next to each denomination icon drawn into

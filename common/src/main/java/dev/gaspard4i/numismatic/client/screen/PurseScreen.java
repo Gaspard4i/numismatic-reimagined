@@ -9,7 +9,6 @@ import dev.gaspard4i.numismatic.network.NumismaticNetworking;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -17,35 +16,59 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * Purse popup — four rows (N/G/S/B) with +/- buttons, then an Extract
- * footer. Right panel from {@code purse_widget.png} drawn as background.
+ * Purse popup — faithful port of the original {@code purse.xml} layout
+ * but with 4 denominations (netherite / gold / silver / bronze) instead
+ * of the upstream 3. Background is the left panel of
+ * {@code purse_widget.png} (UV 0, 5, 37×66); increment/decrement buttons
+ * are 9×5 texture regions (UV 37,24 and 46,24); the extract button is
+ * 24×8 at UV (37, 0).
+ *
+ * <p>Shift-click on + or – applies {@link PurseExtractLogic#SHIFT_MULTIPLIER}.
  */
 public class PurseScreen extends Screen {
 
     private static final ResourceLocation TEXTURE =
             new ResourceLocation(NumismaticConstants.MOD_ID, "textures/gui/purse_widget.png");
 
-    // Panel region : right half of the atlas (x=82, y=0, 44x71).
-    private static final int UV_U = 82, UV_V = 0;
-    private static final int PANEL_W = 44;
-    private static final int PANEL_H = 71;
+    // Left panel of our atlas : starts at (0, 5), 37 wide × 66 tall
+    // (6 extra pixels vs the upstream 59 so the 4th denomination row fits).
+    private static final int PANEL_UV_U = 0, PANEL_UV_V = 5;
+    private static final int PANEL_W = 37;
+    private static final int PANEL_H = 66;
 
-    // Plus / minus glyph UV regions in the same atlas.
-    private static final int BTN_PLUS_UV_U = 38, BTN_PLUS_UV_V = 0;
-    private static final int BTN_PLUS_W = 23, BTN_PLUS_H = 8;
-    private static final int BTN_MINUS_UV_U = 38, BTN_MINUS_UV_V = 24;
-    private static final int BTN_MINUS_W = 18, BTN_MINUS_H = 9;
+    // Adjustment buttons (match upstream 9×5 spritelets at v=24).
+    private static final int BTN_W = 9;
+    private static final int BTN_H = 5;
+    private static final int BTN_PLUS_UV_U = 37;
+    private static final int BTN_MINUS_UV_U = 46;
+    private static final int BTN_UV_V = 24;
 
-    // Row geometry — 4 rows of 12 px each, first row baseline at y=5.
-    private static final int ROW_Y0 = 5;
+    // Extract button (upstream 24×8 at (37, 0)).
+    private static final int EXTRACT_W = 24;
+    private static final int EXTRACT_H = 8;
+    private static final int EXTRACT_UV_U = 37;
+    private static final int EXTRACT_UV_V = 0;
+
+    // Row geometry (relative to panel top-left).
+    private static final int ROW_Y0 = 6;
     private static final int ROW_HEIGHT = 12;
-    private static final int COIN_X = 3;
-    private static final int VALUE_X = 21;
+    private static final int ICON_X = 3;      // coin icon column
+    private static final int VALUE_X = 14;    // balance text column (8 px wide)
+    private static final int PLUS_X = 24;     // +/- column
+    private static final int MINUS_X = 24;
+    private static final int EXTRACT_REL_X = 6;
+    private static final int EXTRACT_REL_Y = 54;
+
+    // Top-down currency order, largest denom first.
+    private static final Currency[] ORDER = {
+            Currency.NETHERITE, Currency.GOLD, Currency.SILVER, Currency.BRONZE
+    };
 
     private final Screen parent;
     private int leftPos;
     private int topPos;
 
+    // Pending withdrawal amounts per denomination (indexed by Currency.ordinal()).
     private final long[] pending = new long[Currency.values().length];
 
     public PurseScreen(Screen parent) {
@@ -57,39 +80,24 @@ public class PurseScreen extends Screen {
     protected void init() {
         super.init();
         leftPos = (width - PANEL_W) / 2;
-        topPos = (height - PANEL_H - 24) / 2;
+        topPos = (height - PANEL_H) / 2;
 
-        // Per-row +/- buttons.
-        addRow(0, Currency.NETHERITE);
-        addRow(1, Currency.GOLD);
-        addRow(2, Currency.SILVER);
-        addRow(3, Currency.BRONZE);
+        // One +/- pair per row (4 rows).
+        for (int i = 0; i < ORDER.length; i++) {
+            Currency c = ORDER[i];
+            int rowY = topPos + ROW_Y0 + i * ROW_HEIGHT;
+            addRenderableWidget(new AdjustButton(
+                    leftPos + PLUS_X, rowY, BTN_PLUS_UV_U, true,
+                    () -> pend(c, +1)));
+            addRenderableWidget(new AdjustButton(
+                    leftPos + MINUS_X, rowY + BTN_H + 1, BTN_MINUS_UV_U, false,
+                    () -> pend(c, -1)));
+        }
 
-        // Extract footer.
-        addRenderableWidget(Button.builder(
-                Component.translatable("gui.numismatic_reimagined.purse.extract"),
-                b -> onExtract())
-                .bounds(leftPos, topPos + PANEL_H + 2, PANEL_W, 16)
-                .build());
-
-        // Close footer : return to the previous screen.
-        addRenderableWidget(Button.builder(
-                Component.literal("X"),
-                b -> Minecraft.getInstance().setScreen(parent))
-                .bounds(leftPos + PANEL_W + 2, topPos, 14, 14)
-                .build());
-    }
-
-    private void addRow(int rowIndex, Currency c) {
-        int y = topPos + ROW_Y0 + rowIndex * ROW_HEIGHT;
-        int plusX = leftPos + PANEL_W - BTN_PLUS_W - 2;
-        int minusX = leftPos + PANEL_W - BTN_MINUS_W - 2;
-        addRenderableWidget(new SmallTexButton(
-                plusX, y - 1, BTN_PLUS_W, BTN_PLUS_H,
-                BTN_PLUS_UV_U, BTN_PLUS_UV_V, () -> pend(c, +1)));
-        addRenderableWidget(new SmallTexButton(
-                minusX, y + BTN_PLUS_H, BTN_MINUS_W, BTN_MINUS_H,
-                BTN_MINUS_UV_U, BTN_MINUS_UV_V, () -> pend(c, -1)));
+        // Extract (texture button embedded in the panel).
+        addRenderableWidget(new ExtractButton(
+                leftPos + EXTRACT_REL_X, topPos + EXTRACT_REL_Y,
+                this::onExtract));
     }
 
     private void pend(Currency c, int delta) {
@@ -99,9 +107,7 @@ public class PurseScreen extends Screen {
         else PurseExtractLogic.decrement(pending, c, shift);
     }
 
-    private long totalPending() {
-        return PurseExtractLogic.totalPending(pending);
-    }
+    private long totalPending() { return PurseExtractLogic.totalPending(pending); }
 
     private void onExtract() {
         long amount = totalPending();
@@ -113,35 +119,53 @@ public class PurseScreen extends Screen {
     @Override
     public void render(GuiGraphics g, int mouseX, int mouseY, float partial) {
         renderBackground(g);
-        g.blit(TEXTURE, leftPos, topPos, UV_U, UV_V, PANEL_W, PANEL_H);
 
+        // Panel background.
+        g.blit(TEXTURE, leftPos, topPos, PANEL_UV_U, PANEL_UV_V, PANEL_W, PANEL_H);
+
+        // Coin icon + value text per row.
         long balance = ClientCurrencyData.getBalance();
         long[] split = splitValues(balance);
-
-        Currency[] order = { Currency.NETHERITE, Currency.GOLD, Currency.SILVER, Currency.BRONZE };
         long[] owned = { split[3], split[2], split[1], split[0] };
 
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < ORDER.length; i++) {
             int y = topPos + ROW_Y0 + i * ROW_HEIGHT;
-            ItemStack coinStack = new ItemStack(NumismaticItems.getCoinItem(order[i]));
-            g.renderItem(coinStack, leftPos + COIN_X, y - 4);
-            long p = pending[order[i].ordinal()];
-            String text = p > 0 ? (owned[i] - p) + " (-" + p + ")" : String.valueOf(owned[i]);
-            g.drawString(font, text, leftPos + VALUE_X, y, 0xFFFFFF, false);
+            ItemStack coinStack = new ItemStack(NumismaticItems.getCoinItem(ORDER[i]));
+            // Coin icon rendered at 8×8 (renderFakeItem auto-scales down).
+            g.renderFakeItem(coinStack, leftPos + ICON_X, y);
+            long p = pending[ORDER[i].ordinal()];
+            String text = p > 0 ? (owned[i] - p) + "(-" + p + ")" : String.valueOf(owned[i]);
+            // Clip so we never bleed past the +/- column.
+            g.drawString(font, text, leftPos + VALUE_X, y + 2, 0xFFFFFF, false);
         }
 
         super.render(g, mouseX, mouseY, partial);
 
+        // Title above, pending total below.
         g.drawCenteredString(font, title, leftPos + PANEL_W / 2, topPos - 12, 0xFFFFFF);
         long total = totalPending();
         if (total > 0) {
             g.drawCenteredString(font, "Extract " + String.format("%,d", total),
-                    leftPos + PANEL_W / 2, topPos + PANEL_H + 22, 0xFFD700);
+                    leftPos + PANEL_W / 2, topPos + PANEL_H + 4, 0xFFD700);
         }
     }
 
+    @Override public boolean isPauseScreen() { return false; }
+
     @Override
-    public boolean isPauseScreen() { return false; }
+    public boolean mouseClicked(double x, double y, int btn) {
+        // Click outside the panel closes the popup (familiar UX).
+        if (btn == 0 && !inPanel(x, y)) {
+            Minecraft.getInstance().setScreen(parent);
+            return true;
+        }
+        return super.mouseClicked(x, y, btn);
+    }
+
+    private boolean inPanel(double x, double y) {
+        return x >= leftPos && x < leftPos + PANEL_W
+                && y >= topPos && y < topPos + PANEL_H;
+    }
 
     private static long[] splitValues(long v) {
         long netherite = v / Currency.NETHERITE.getValue();
@@ -153,23 +177,50 @@ public class PurseScreen extends Screen {
         return new long[]{ bronze, silver, gold, netherite };
     }
 
-    /** Button rendered from a flat UV region of purse_widget.png. */
-    private static final class SmallTexButton extends AbstractWidget {
-        private final int uvU, uvV;
+    /** Small +/- button (9×5 texture sprite, hover uses a darker overlay). */
+    private static final class AdjustButton extends AbstractWidget {
+        private final int uvU;
         private final Runnable onClick;
 
-        SmallTexButton(int x, int y, int w, int h, int uvU, int uvV, Runnable onClick) {
-            super(x, y, w, h, Component.empty());
+        AdjustButton(int x, int y, int uvU, boolean plus, Runnable onClick) {
+            super(x, y, BTN_W, BTN_H, Component.literal(plus ? "+" : "-"));
             this.uvU = uvU;
-            this.uvV = uvV;
             this.onClick = onClick;
         }
 
         @Override
         protected void renderWidget(GuiGraphics g, int mouseX, int mouseY, float partial) {
-            int v = uvV;
-            if (isHovered()) v += this.height;
-            g.blit(TEXTURE, getX(), getY(), uvU, v, this.width, this.height);
+            g.blit(TEXTURE, getX(), getY(), uvU, BTN_UV_V, BTN_W, BTN_H);
+            if (isHovered()) {
+                g.fill(getX(), getY(), getX() + width, getY() + height, 0x30FFFFFF);
+            }
+        }
+
+        @Override
+        public void onClick(double mouseX, double mouseY) { onClick.run(); }
+
+        @Override
+        protected void updateWidgetNarration(NarrationElementOutput out) {
+            this.defaultButtonNarrationText(out);
+        }
+    }
+
+    /** Extract texture button (24×8 sprite at UV 37, 0). */
+    private static final class ExtractButton extends AbstractWidget {
+        private final Runnable onClick;
+
+        ExtractButton(int x, int y, Runnable onClick) {
+            super(x, y, EXTRACT_W, EXTRACT_H,
+                    Component.translatable("gui.numismatic_reimagined.purse.extract"));
+            this.onClick = onClick;
+        }
+
+        @Override
+        protected void renderWidget(GuiGraphics g, int mouseX, int mouseY, float partial) {
+            g.blit(TEXTURE, getX(), getY(), EXTRACT_UV_U, EXTRACT_UV_V, EXTRACT_W, EXTRACT_H);
+            if (isHovered()) {
+                g.fill(getX(), getY(), getX() + width, getY() + height, 0x40FFFFFF);
+            }
         }
 
         @Override
