@@ -2,6 +2,7 @@ package dev.gaspard4i.numismatic.command;
 
 import com.mojang.brigadier.arguments.LongArgumentType;
 import dev.architectury.event.events.common.CommandRegistrationEvent;
+import dev.gaspard4i.numismatic.currency.CurrencyFormatter;
 import dev.gaspard4i.numismatic.currency.PlayerCurrencyManager;
 import dev.gaspard4i.numismatic.network.NumismaticNetworking;
 import net.minecraft.commands.Commands;
@@ -23,7 +24,9 @@ public final class NumismaticCommands {
                                 long balance = PlayerCurrencyManager.get(player.serverLevel())
                                         .getBalance(player.getUUID());
                                 ctx.getSource().sendSuccess(
-                                        () -> Component.literal("Balance: " + balance + " bronze"),
+                                        () -> Component.translatable(
+                                                "command.numismatic_reimagined.balance.self",
+                                                CurrencyFormatter.format(balance)),
                                         false);
                                 return 1;
                             })
@@ -41,8 +44,10 @@ public final class NumismaticCommands {
                                                 NumismaticNetworking.syncBalance(target,
                                                         mgr.getBalance(target.getUUID()));
                                                 ctx.getSource().sendSuccess(
-                                                        () -> Component.literal("Gave " + amount + " to "
-                                                                + target.getName().getString()),
+                                                        () -> Component.translatable(
+                                                                "command.numismatic_reimagined.give",
+                                                                CurrencyFormatter.format(amount),
+                                                                target.getName().getString()),
                                                         true);
                                                 return 1;
                                             })
@@ -62,9 +67,10 @@ public final class NumismaticCommands {
                                                 NumismaticNetworking.syncBalance(target,
                                                         mgr.getBalance(target.getUUID()));
                                                 ctx.getSource().sendSuccess(
-                                                        () -> Component.literal("Set "
-                                                                + target.getName().getString() + "'s balance to "
-                                                                + amount),
+                                                        () -> Component.translatable(
+                                                                "command.numismatic_reimagined.set",
+                                                                target.getName().getString(),
+                                                                CurrencyFormatter.format(amount)),
                                                         true);
                                                 return 1;
                                             })

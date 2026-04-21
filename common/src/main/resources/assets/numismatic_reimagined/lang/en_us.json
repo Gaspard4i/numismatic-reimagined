@@ -10,6 +10,7 @@
 
   "tooltip.numismatic_reimagined.coin_value": "Value: %s",
   "tooltip.numismatic_reimagined.money_bag_value": "Contains: %s",
+  "currency.numismatic_reimagined.symbol": "¢",
   "tooltip.numismatic_reimagined.star_coin": "A legendary trophy coin",
   "tooltip.numismatic_reimagined.star_coin.desc": "Awarded for accumulating 1000 Netherite Coins",
 

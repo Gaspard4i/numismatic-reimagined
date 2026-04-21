@@ -10,6 +10,7 @@
 
   "tooltip.numismatic_reimagined.coin_value": "Valeur : %s",
   "tooltip.numismatic_reimagined.money_bag_value": "Contient : %s",
+  "currency.numismatic_reimagined.symbol": "¢",
   "tooltip.numismatic_reimagined.star_coin": "Une pièce trophée légendaire",
   "tooltip.numismatic_reimagined.star_coin.desc": "Obtenue en accumulant 1000 Pièces de netherite",
 
