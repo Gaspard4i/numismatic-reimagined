@@ -15,8 +15,6 @@
   "tooltip.numismatic_reimagined.star_coin.desc": "Obtenue en accumulant 1000 Pièces de netherite",
 
   "block.numismatic_reimagined.piggy_bank": "Tirelire",
-  "block.numismatic_reimagined.golden_piggy_bank": "Tirelire dorée",
-  "block.numismatic_reimagined.netherite_piggy_bank": "Tirelire en netherite",
   "block.numismatic_reimagined.piggy_bank.empty": "Cette tirelire est vide",
   "block.numismatic_reimagined.piggy_bank.contains": "Contient : %s coins",
   "block.numismatic_reimagined.piggy_bank.inserted": "+%s coins inséré",
@@ -42,6 +40,7 @@
   "block.numismatic_reimagined.netherite_shop": "Boutique de netherite",
   "gui.numismatic_reimagined.shop.transfer_tooltip": "Entrée hopper (offres whitelist)",
   "tooltip.numismatic_reimagined.money_bag.empty": "Bourse vide",
+  "tooltip.numismatic_reimagined.piggy_bank.empty": "Tirelire vide",
   "advancement.numismatic_reimagined.star_coin.title": "Collectionneur d'étoiles",
   "advancement.numismatic_reimagined.star_coin.description": "Accumule 1000 Netherite Coins pour gagner la Star Coin légendaire.",
   "block.numismatic_reimagined.request_board": "Panneau de requêtes",

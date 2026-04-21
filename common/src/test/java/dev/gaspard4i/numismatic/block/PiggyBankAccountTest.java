@@ -19,7 +19,7 @@ class PiggyBankAccountTest {
 
     @Test
     void initialClampsToCap() {
-        PiggyBankAccount a = new PiggyBankAccount(PiggyBankTier.BASE, 99_999L);
+        PiggyBankAccount a = new PiggyBankAccount(PiggyBankTier.BASE, PiggyBankTier.BASE.cap() + 100);
         assertEquals(PiggyBankTier.BASE.cap(), a.stored());
         assertTrue(a.isFull());
     }
@@ -37,15 +37,15 @@ class PiggyBankAccountTest {
 
     @Test
     void tryDepositPartialWhenCapped() {
-        PiggyBankAccount a = new PiggyBankAccount(PiggyBankTier.BASE, 9_990L);
+        PiggyBankAccount a = new PiggyBankAccount(PiggyBankTier.BASE, PiggyBankTier.BASE.cap() - 10);
         long accepted = a.tryDeposit(100);
-        assertEquals(9L, accepted);
+        assertEquals(10L, accepted);
         assertEquals(PiggyBankTier.BASE.cap(), a.stored());
     }
 
     @Test
     void tryDepositFullyWhenRoom() {
-        PiggyBankAccount a = new PiggyBankAccount(PiggyBankTier.NETHERITE);
+        PiggyBankAccount a = new PiggyBankAccount(PiggyBankTier.BASE);
         long accepted = a.tryDeposit(500_000);
         assertEquals(500_000L, accepted);
         assertEquals(500_000L, a.stored());
@@ -59,7 +59,7 @@ class PiggyBankAccountTest {
 
     @Test
     void tryDepositZeroIsNoOp() {
-        PiggyBankAccount a = new PiggyBankAccount(PiggyBankTier.GOLDEN, 500);
+        PiggyBankAccount a = new PiggyBankAccount(PiggyBankTier.BASE, 500);
         assertEquals(0L, a.tryDeposit(0));
         assertEquals(500L, a.stored());
     }
@@ -72,7 +72,7 @@ class PiggyBankAccountTest {
 
     @Test
     void crushReturnsAndEmptiesContents() {
-        PiggyBankAccount a = new PiggyBankAccount(PiggyBankTier.GOLDEN, 500);
+        PiggyBankAccount a = new PiggyBankAccount(PiggyBankTier.BASE, 500);
         assertEquals(500L, a.crush());
         assertEquals(0L, a.stored());
         assertTrue(a.isEmpty());
@@ -80,10 +80,10 @@ class PiggyBankAccountTest {
 
     @Test
     void remainingDecreasesAfterDeposit() {
-        PiggyBankAccount a = new PiggyBankAccount(PiggyBankTier.GOLDEN, 10);
-        assertEquals(PiggyBankTier.GOLDEN.cap() - 10, a.remaining());
+        PiggyBankAccount a = new PiggyBankAccount(PiggyBankTier.BASE, 10);
+        assertEquals(PiggyBankTier.BASE.cap() - 10, a.remaining());
         a.tryDeposit(90);
-        assertEquals(PiggyBankTier.GOLDEN.cap() - 100, a.remaining());
+        assertEquals(PiggyBankTier.BASE.cap() - 100, a.remaining());
     }
 
     @Test

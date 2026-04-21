@@ -37,8 +37,6 @@ public final class NumismaticCreativeTab {
                         add(output, NumismaticItems.NETHERITE_COIN);
                         add(output, NumismaticItems.MONEY_BAG);
                         add(output, () -> PiggyBankBlocks.blockFor(PiggyBankTier.BASE));
-                        add(output, () -> PiggyBankBlocks.blockFor(PiggyBankTier.GOLDEN));
-                        add(output, () -> PiggyBankBlocks.blockFor(PiggyBankTier.NETHERITE));
                         add(output, () -> NumismaticShops.blockFor(ShopTier.BRONZE));
                         add(output, () -> NumismaticShops.blockFor(ShopTier.SILVER));
                         add(output, () -> NumismaticShops.blockFor(ShopTier.GOLD));
