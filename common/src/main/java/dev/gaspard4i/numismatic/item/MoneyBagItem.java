@@ -45,6 +45,10 @@ public class MoneyBagItem extends Item {
         return stack;
     }
 
+    public static ItemStack createWithValue(long value) {
+        return createWithValue(dev.gaspard4i.numismatic.item.NumismaticItems.MONEY_BAG.get(), value);
+    }
+
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
