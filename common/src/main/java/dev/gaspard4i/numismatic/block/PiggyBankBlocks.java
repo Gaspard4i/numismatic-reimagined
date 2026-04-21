@@ -41,7 +41,7 @@ public final class PiggyBankBlocks {
             BLOCKS_BY_TIER.put(tier, block);
 
             NumismaticItems.ITEMS.register(tier.id(),
-                    () -> new BlockItem(block.get(), new Item.Properties()));
+                    () -> new PiggyBankBlockItem(block.get(), new Item.Properties(), tier));
 
             RegistrySupplier<BlockEntityType<PiggyBankBlockEntity>> beType = BLOCK_ENTITIES.register(
                     tier.id(),
