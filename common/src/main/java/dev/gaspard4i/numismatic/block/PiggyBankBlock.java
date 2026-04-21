@@ -259,6 +259,9 @@ public class PiggyBankBlock extends BaseEntityBlock {
                 if (!piggy.account().isEmpty()) {
                     CompoundTag beTag = new CompoundTag();
                     beTag.putLong("Stored", piggy.account().stored());
+                    var beTypeId = net.minecraft.core.registries.BuiltInRegistries.BLOCK_ENTITY_TYPE
+                            .getKey(PiggyBankBlocks.blockEntityTypeFor(tier));
+                    if (beTypeId != null) beTag.putString("id", beTypeId.toString());
                     drop.set(net.minecraft.core.component.DataComponents.BLOCK_ENTITY_DATA,
                             net.minecraft.world.item.component.CustomData.of(beTag));
                 }
