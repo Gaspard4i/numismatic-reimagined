@@ -76,6 +76,13 @@ public class PurseInventoryWidget extends AbstractWidget {
 
     public boolean isPopupOpen() { return popupOpen; }
 
+    /** Upstream parity : the purse disappears when not on the creative Inventory tab. */
+    public void setShown(boolean shown) {
+        this.visible = shown;
+        this.active = shown;
+        if (!shown) popupOpen = false;
+    }
+
     private int popupLeft() { return getX() + POPUP_MARGIN_X; }
     private int popupTop()  { return getY() + POPUP_MARGIN_Y; }
 

@@ -22,6 +22,13 @@ public final class NumismaticClient {
             }
         });
 
+        // Upstream parity : hide the purse button on creative tabs other than "Inventory".
+        ClientGuiEvent.RENDER_POST.register((screen, graphics, mouseX, mouseY, tickDelta) -> {
+            if (screen instanceof CreativeModeInventoryScreen creative) {
+                PurseScreenHook.updateCreativeVisibility(creative);
+            }
+        });
+
         // Money bag tier predicate : empty / silver / gold / netherite skins.
         ItemProperties.register(
                 NumismaticItems.MONEY_BAG.get(),
