@@ -15,18 +15,20 @@ import net.minecraft.resources.ResourceLocation;
 /**
  * Purse button + popup rendered as an overlay over the inventory screen.
  *
- * <p>Layout ported from upstream wisp-forest/numismatic-overhaul owo_ui/purse.xml :
+ * <p>Structure is a faithful port of upstream wisp-forest/numismatic-overhaul
+ * {@code owo_ui/purse.xml}, rebuilt with vanilla {@link AbstractWidget} so it works on
+ * both Fabric and NeoForge without a UI library dependency :
  * <ul>
- *   <li>Button 11x13 at UV (62, 0) in purse_widget.png (128x64)</li>
+ *   <li>Button 11x13 at UV (62, 0) in {@code purse_widget.png} (128x64)</li>
  *   <li>Popup panel 37x59 at UV (0, 0), positioned at button + (-30, +15)</li>
- *   <li>3 count labels at (5, 12) with vertical gap of 3 → effective stride ≈ 12 px</li>
- *   <li>6 +/- buttons stacked vertically at (18, 10), gap 1 → (plus/minus) pair per denom, stride 12 px</li>
+ *   <li>3 count labels at (5, 12) with vertical stride 12 → gold / silver / bronze</li>
+ *   <li>6 +/- buttons stacked at (18, 10), each 9x5, gap 1 → 2 per denom (increment / decrement)</li>
  *   <li>Extract button 24x8 at UV (37, 0) positioned at (3, 46)</li>
  * </ul>
  *
- * <p>Reimagined adaptation : we keep the same per-row stride (12 px) but add a 4th netherite
- * row on top, extending the panel height from 59 to 71 px. The last 12 px are drawn by
- * repeating the bottom strip of the source region so the extract button stays on a clean edge.
+ * <p>Reimagined choice : we stay at 3 rows (gold/silver/bronze) to keep the original
+ * upstream layout intact. Netherite coins are shown in tooltips and item counts but the
+ * extract UI stops at gold ; netherite is automatically converted down when needed.
  */
 public class PurseInventoryWidget extends AbstractWidget {
 
@@ -41,40 +43,35 @@ public class PurseInventoryWidget extends AbstractWidget {
     private static final int BUTTON_UV_V = 0;
 
     private static final int PANEL_W = 37;
-    private static final int PANEL_BASE_H = 59;
-    private static final int ROW_STRIDE = 12;
-    private static final int EXTRA_ROW_H = ROW_STRIDE; // one extra row for netherite
-    private static final int PANEL_H = PANEL_BASE_H + EXTRA_ROW_H;
+    private static final int PANEL_H = 59;
 
-    // Upstream origins (inside the panel).
     private static final int LABEL_ORIGIN_X = 5;
     private static final int LABEL_ORIGIN_Y = 12;
+    private static final int ROW_STRIDE = 12;
+
     private static final int BTN_ORIGIN_X = 18;
     private static final int BTN_ORIGIN_Y = 10;
     private static final int BTN_W = 9;
     private static final int BTN_H = 5;
     private static final int BTN_GAP = 1;
 
-    // Extract button : upstream y=46 for 3 rows ; shift by EXTRA_ROW_H for our 4th row.
     private static final int EXTRACT_X = 3;
-    private static final int EXTRACT_Y = 46 + EXTRA_ROW_H;
+    private static final int EXTRACT_Y = 46;
     private static final int EXTRACT_W = 24;
     private static final int EXTRACT_H = 8;
 
-    // UV coords inside purse_widget.png.
     private static final int BTN_PLUS_UV_U = 37;
     private static final int BTN_MINUS_UV_U = 46;
     private static final int BTN_UV_V = 24;
     private static final int EXTRACT_UV_U = 37;
     private static final int EXTRACT_UV_V = 0;
 
-    // Popup margins relative to the button (upstream : left=-30, top=15).
     private static final int POPUP_MARGIN_X = -30;
     private static final int POPUP_MARGIN_Y = 15;
 
-    // MSD-first display order. Row index = position in this array.
+    /** Display order mirrors upstream : gold / silver / bronze, top to bottom. */
     private static final Currency[] ORDER = {
-            Currency.NETHERITE, Currency.GOLD, Currency.SILVER, Currency.BRONZE
+            Currency.GOLD, Currency.SILVER, Currency.BRONZE
     };
 
     private boolean popupOpen = false;
@@ -90,11 +87,10 @@ public class PurseInventoryWidget extends AbstractWidget {
     private int popupLeft() { return getX() + POPUP_MARGIN_X; }
     private int popupTop()  { return getY() + POPUP_MARGIN_Y; }
 
-    /** Y position of the count label for row {@code i} (MSD-first). */
     private int labelY(int i) { return popupTop() + LABEL_ORIGIN_Y + i * ROW_STRIDE; }
-    /** Y position of the + button for row {@code i}. */
-    private int plusY(int i)  { return popupTop() + BTN_ORIGIN_Y + i * (BTN_H + BTN_GAP + BTN_H + BTN_GAP); }
-    /** Y position of the - button for row {@code i} (just below +). */
+
+    /** Upstream stacks 6 buttons vertically in one flow-layout : +g, -g, +s, -s, +b, -b. */
+    private int plusY(int i)  { return popupTop() + BTN_ORIGIN_Y + i * 2 * (BTN_H + BTN_GAP); }
     private int minusY(int i) { return plusY(i) + BTN_H + BTN_GAP; }
 
     private int adjustX()  { return popupLeft() + BTN_ORIGIN_X; }
@@ -114,24 +110,10 @@ public class PurseInventoryWidget extends AbstractWidget {
         int px = popupLeft();
         int py = popupTop();
 
-        // Top part : upstream's base panel (37x59) starting at (0, 0).
-        // Covers the labels rows 0..2 and the top of the extract button area.
-        int baseTopH = PANEL_BASE_H - 13; // 46 px : everything above the extract band
-        g.blit(TEXTURE, px, py, 0, 0, PANEL_W, baseTopH, TEX_W, TEX_H);
-
-        // Extra row : repeat the strip covering the 3rd upstream label row (y 24..36 in source)
-        // to create our 4th row without stretching.
-        int stripSrcY = 24;
-        int stripDstY = py + baseTopH;
-        int stripH = ROW_STRIDE;
-        g.blit(TEXTURE, px, stripDstY, 0, stripSrcY, PANEL_W, stripH, TEX_W, TEX_H);
-
-        // Bottom part : the extract button zone (last 13 px of upstream panel source).
-        g.blit(TEXTURE, px, stripDstY + stripH, 0, PANEL_BASE_H - 13, PANEL_W, 13, TEX_W, TEX_H);
+        g.blit(TEXTURE, px, py, 0, 0, PANEL_W, PANEL_H, TEX_W, TEX_H);
 
         long[] owned = splitOwnedMsdFirst(ClientCurrencyData.getBalance());
 
-        // Rows (MSD-first).
         for (int i = 0; i < ORDER.length; i++) {
             Currency c = ORDER[i];
             int idx = c.ordinal();
@@ -186,14 +168,12 @@ public class PurseInventoryWidget extends AbstractWidget {
         }
         boolean handled = super.mouseClicked(mouseX, mouseY, button);
         if (!handled && popupOpen && button == 0 && !isInsideButton(mouseX, mouseY)) {
-            // Click outside the button and outside the popup → close popup.
             popupOpen = false;
             PurseExtractLogic.clear(pending);
         }
         return handled;
     }
 
-    /** Returns true if the widget popup consumed the click (needed so the inventory doesn't react to it). */
     public boolean consumesClick(double mouseX, double mouseY) {
         return popupOpen && isInsidePopup(mouseX, mouseY);
     }
@@ -246,15 +226,20 @@ public class PurseInventoryWidget extends AbstractWidget {
 
     private long totalPending() { return PurseExtractLogic.totalPending(pending); }
 
-    /** Returns an MSD-first split matching {@link #ORDER}: [NETHERITE, GOLD, SILVER, BRONZE]. */
+    /**
+     * Returns a gold/silver/bronze split (MSD-first) of the player's balance.
+     * Netherite (reimagined exclusive) is internally down-converted to gold multiples
+     * so the 3-row upstream UI still shows the full balance : 1 netherite = 100 gold.
+     */
     private static long[] splitOwnedMsdFirst(long v) {
         long[] split = new long[ORDER.length];
         long remaining = v;
-        for (int i = 0; i < ORDER.length; i++) {
-            long unit = ORDER[i].getValue();
-            split[i] = remaining / unit;
-            remaining %= unit;
-        }
+        // i=0 GOLD (we multiply by 100 to absorb any netherite)
+        split[0] = remaining / Currency.GOLD.getValue();
+        remaining %= Currency.GOLD.getValue();
+        split[1] = remaining / Currency.SILVER.getValue();
+        remaining %= Currency.SILVER.getValue();
+        split[2] = remaining;
         return split;
     }
 

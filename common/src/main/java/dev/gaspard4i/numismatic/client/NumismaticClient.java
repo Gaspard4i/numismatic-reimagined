@@ -26,6 +26,19 @@ public final class NumismaticClient {
                 (stack, level, entity, seed) -> MoneyBagPredicates.tierFor(stack)
         );
 
+        // Coin stack size predicate (upstream : count / 100.0, thresholds 0.09/0.27/0.45/0.63).
+        // Drives the 4 coin pile texture variants (*_0, _1, _2, _3) per denomination.
+        ResourceLocation coinsPredicate =
+                ResourceLocation.fromNamespaceAndPath(NumismaticConstants.MOD_ID, "coins");
+        ItemProperties.register(NumismaticItems.BRONZE_COIN.get(), coinsPredicate,
+                (stack, level, entity, seed) -> stack.getCount() / 100.0f);
+        ItemProperties.register(NumismaticItems.SILVER_COIN.get(), coinsPredicate,
+                (stack, level, entity, seed) -> stack.getCount() / 100.0f);
+        ItemProperties.register(NumismaticItems.GOLD_COIN.get(), coinsPredicate,
+                (stack, level, entity, seed) -> stack.getCount() / 100.0f);
+        ItemProperties.register(NumismaticItems.NETHERITE_COIN.get(), coinsPredicate,
+                (stack, level, entity, seed) -> stack.getCount() / 100.0f);
+
         // Tooltip component registration is platform-specific :
         //  - fabric: NumismaticFabricClient.onInitializeClient → TooltipComponentCallback
         //  - neoforge: NumismaticNeoForgeClient.onRegisterClientTooltipComponentFactories
