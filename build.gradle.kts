@@ -23,6 +23,7 @@ subprojects {
         mavenCentral()
         maven("https://maven.parchmentmc.org")
         maven("https://maven.wispforest.io")
+        maven("https://maven.su5ed.dev/releases") { name = "Sinytra (owo-neoforge transitive deps)" }
         maven("https://maven.neoforged.net/releases/")
         maven("https://maven.blamejared.com") { name = "BlameJared (JEI)" }
         maven("https://modmaven.dev") { name = "ModMaven (JEI mirror)" }

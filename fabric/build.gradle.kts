@@ -42,6 +42,10 @@ dependencies {
 
     modImplementation("dev.architectury:architectury-fabric:$architecturyApiVersion")
 
+    // Fabric owo-lib kept out for now to match the NeoForge decision (parity with blocked
+    // neoforge port). Vanilla PurseInventoryWidget handles the purse UI cross-loader.
+    // modImplementation("io.wispforest:owo-lib:${property("owo_lib_fabric_version")}")
+
     // Dev-only runtime mods for easier testing (JEI, Jade).
     modRuntimeOnly("mezz.jei:jei-1.21.1-fabric:${property("jei_version")}")
     modRuntimeOnly("maven.modrinth:jade:${property("jade_version_fabric")}@jar")

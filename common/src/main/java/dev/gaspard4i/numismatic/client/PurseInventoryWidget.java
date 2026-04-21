@@ -13,22 +13,15 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
 /**
- * Purse button + popup rendered as an overlay over the inventory screen.
- *
- * <p>Structure is a faithful port of upstream wisp-forest/numismatic-overhaul
- * {@code owo_ui/purse.xml}, rebuilt with vanilla {@link AbstractWidget} so it works on
- * both Fabric and NeoForge without a UI library dependency :
+ * Purse button + extract popup rendered as an overlay. Layout (texture UV, positions) is
+ * the faithful port of upstream wisp-forest/numismatic-overhaul {@code owo_ui/purse.xml} :
  * <ul>
  *   <li>Button 11x13 at UV (62, 0) in {@code purse_widget.png} (128x64)</li>
  *   <li>Popup panel 37x59 at UV (0, 0), positioned at button + (-30, +15)</li>
- *   <li>3 count labels at (5, 12) with vertical stride 12 → gold / silver / bronze</li>
- *   <li>6 +/- buttons stacked at (18, 10), each 9x5, gap 1 → 2 per denom (increment / decrement)</li>
- *   <li>Extract button 24x8 at UV (37, 0) positioned at (3, 46)</li>
+ *   <li>3 count labels at (5, 12) with vertical stride 12 (gold / silver / bronze)</li>
+ *   <li>6 +/- buttons at (18, 10), 9x5, gap 1 (2 per denom)</li>
+ *   <li>Extract button 24x8 at UV (37, 0) at (3, 46)</li>
  * </ul>
- *
- * <p>Reimagined choice : we stay at 3 rows (gold/silver/bronze) to keep the original
- * upstream layout intact. Netherite coins are shown in tooltips and item counts but the
- * extract UI stops at gold ; netherite is automatically converted down when needed.
  */
 public class PurseInventoryWidget extends AbstractWidget {
 
@@ -69,7 +62,6 @@ public class PurseInventoryWidget extends AbstractWidget {
     private static final int POPUP_MARGIN_X = -30;
     private static final int POPUP_MARGIN_Y = 15;
 
-    /** Display order mirrors upstream : gold / silver / bronze, top to bottom. */
     private static final Currency[] ORDER = {
             Currency.GOLD, Currency.SILVER, Currency.BRONZE
     };
@@ -88,8 +80,6 @@ public class PurseInventoryWidget extends AbstractWidget {
     private int popupTop()  { return getY() + POPUP_MARGIN_Y; }
 
     private int labelY(int i) { return popupTop() + LABEL_ORIGIN_Y + i * ROW_STRIDE; }
-
-    /** Upstream stacks 6 buttons vertically in one flow-layout : +g, -g, +s, -s, +b, -b. */
     private int plusY(int i)  { return popupTop() + BTN_ORIGIN_Y + i * 2 * (BTN_H + BTN_GAP); }
     private int minusY(int i) { return plusY(i) + BTN_H + BTN_GAP; }
 
@@ -109,7 +99,6 @@ public class PurseInventoryWidget extends AbstractWidget {
     private void drawPopup(GuiGraphics g, int mouseX, int mouseY) {
         int px = popupLeft();
         int py = popupTop();
-
         g.blit(TEXTURE, px, py, 0, 0, PANEL_W, PANEL_H, TEX_W, TEX_H);
 
         long[] owned = splitOwnedMsdFirst(ClientCurrencyData.getBalance());
@@ -157,10 +146,6 @@ public class PurseInventoryWidget extends AbstractWidget {
         if (!popupOpen) PurseExtractLogic.clear(pending);
     }
 
-    /**
-     * Intercepts clicks that fall inside the popup bounds (the widget itself is only 11x13,
-     * so vanilla {@code mouseClicked} dispatch wouldn't reach the popup without this override).
-     */
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (popupOpen && button == 0 && isInsidePopup(mouseX, mouseY)) {
@@ -226,15 +211,9 @@ public class PurseInventoryWidget extends AbstractWidget {
 
     private long totalPending() { return PurseExtractLogic.totalPending(pending); }
 
-    /**
-     * Returns a gold/silver/bronze split (MSD-first) of the player's balance.
-     * Netherite (reimagined exclusive) is internally down-converted to gold multiples
-     * so the 3-row upstream UI still shows the full balance : 1 netherite = 100 gold.
-     */
     private static long[] splitOwnedMsdFirst(long v) {
         long[] split = new long[ORDER.length];
         long remaining = v;
-        // i=0 GOLD (we multiply by 100 to absorb any netherite)
         split[0] = remaining / Currency.GOLD.getValue();
         remaining %= Currency.GOLD.getValue();
         split[1] = remaining / Currency.SILVER.getValue();

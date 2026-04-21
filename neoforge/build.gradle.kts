@@ -31,6 +31,11 @@ dependencies {
     "neoForge"("net.neoforged:neoforge:$neoforgeVersion")
     modImplementation("dev.architectury:architectury-neoforge:$architecturyApiVersion")
 
+    // owo-lib reactivation blocked on beta : endec transitive not resolved by the NeoForge
+    // 0.12.15.1-beta.6 jar in our dev env. Stay with vanilla widgets for now ; revisit
+    // once a stable owo-lib-neoforge is released for 1.21.1.
+    // modImplementation("io.wispforest:owo-lib-neoforge:${property("owo_lib_neoforge_version")}")
+
     // Dev-only runtime mods for easier testing (JEI, Jade).
     modRuntimeOnly("mezz.jei:jei-1.21.1-neoforge:${property("jei_version")}")
     modRuntimeOnly("maven.modrinth:jade:${property("jade_version_neoforge")}@jar")

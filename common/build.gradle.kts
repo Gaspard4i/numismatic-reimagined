@@ -32,6 +32,11 @@ dependencies {
 
     modImplementation("dev.architectury:architectury:$architecturyApiVersion")
 
+    // owo-lib removed from common compile classpath — see loader modules for rationale.
+    // modCompileOnly("io.wispforest:owo-lib:${property("owo_lib_fabric_version")}")
+    // modCompileOnly("net.fabricmc:fabric-loader:${property("fabric_loader_version")}")
+    // modCompileOnly("net.fabricmc.fabric-api:fabric-resource-loader-v0:2.0.0+1bb677a619")
+
     testImplementation("org.junit.jupiter:junit-jupiter:$junitVersion")
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
     testImplementation("org.mockito:mockito-junit-jupiter:$mockitoVersion")
