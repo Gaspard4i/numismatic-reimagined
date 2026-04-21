@@ -14,6 +14,7 @@ public final class Numismatic {
         dev.gaspard4i.numismatic.component.NumismaticDataComponents.register();
         // Blocks first : they register BlockItem entries into the item registry.
         dev.gaspard4i.numismatic.block.PiggyBankBlocks.register();
+        dev.gaspard4i.numismatic.block.PiggyBankMenus.register();
         dev.gaspard4i.numismatic.shop.NumismaticShops.register();
         dev.gaspard4i.numismatic.request.RequestBoardBlocks.register();
         dev.gaspard4i.numismatic.item.NumismaticItems.register();

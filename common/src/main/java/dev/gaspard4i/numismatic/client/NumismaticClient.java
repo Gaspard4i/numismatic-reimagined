@@ -1,7 +1,10 @@
 package dev.gaspard4i.numismatic.client;
 
 import dev.architectury.event.events.client.ClientGuiEvent;
+import dev.architectury.registry.menu.MenuRegistry;
 import dev.gaspard4i.numismatic.NumismaticConstants;
+import dev.gaspard4i.numismatic.block.PiggyBankMenus;
+import dev.gaspard4i.numismatic.client.screen.PiggyBankScreen;
 import dev.gaspard4i.numismatic.item.NumismaticItems;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
@@ -14,6 +17,8 @@ public final class NumismaticClient {
     private NumismaticClient() {}
 
     public static void init() {
+        MenuRegistry.registerScreenFactory(PiggyBankMenus.PIGGY_BANK_MENU.get(), PiggyBankScreen::new);
+
         ClientGuiEvent.INIT_POST.register((screen, access) -> {
             if (screen instanceof InventoryScreen
                     || screen instanceof CreativeModeInventoryScreen

@@ -108,6 +108,19 @@ public class PiggyBankBlock extends BaseEntityBlock {
     }
 
     @Override
+    protected net.minecraft.world.InteractionResult useWithoutItem(BlockState state, Level level,
+                                                                   BlockPos pos, Player player,
+                                                                   net.minecraft.world.phys.BlockHitResult hit) {
+        if (level.isClientSide()) {
+            return net.minecraft.world.InteractionResult.SUCCESS;
+        }
+        if (level.getBlockEntity(pos) instanceof PiggyBankBlockEntity piggy && player instanceof ServerPlayer serverPlayer) {
+            serverPlayer.openMenu(piggy);
+        }
+        return net.minecraft.world.InteractionResult.CONSUME;
+    }
+
+    @Override
     public @Nullable BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new PiggyBankBlockEntity(
                 PiggyBankBlocks.blockEntityTypeFor(tier), pos, state, tier);
