@@ -1,6 +1,8 @@
 package dev.gaspard4i.numismatic.client;
 
+import dev.architectury.event.EventResult;
 import dev.architectury.event.events.client.ClientGuiEvent;
+import dev.architectury.event.events.client.ClientScreenInputEvent;
 import dev.gaspard4i.numismatic.NumismaticConstants;
 import dev.gaspard4i.numismatic.item.NumismaticItems;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
@@ -28,6 +30,12 @@ public final class NumismaticClient {
                 PurseScreenHook.updateCreativeVisibility(creative);
             }
         });
+
+        // Block clicks from reaching inventory slots behind the purse popup.
+        ClientScreenInputEvent.MOUSE_CLICKED_PRE.register((mc, screen, mx, my, button) ->
+                PurseScreenHook.shouldConsumeClick(screen, mx, my) ? EventResult.interruptFalse() : EventResult.pass());
+        ClientScreenInputEvent.MOUSE_RELEASED_PRE.register((mc, screen, mx, my, button) ->
+                PurseScreenHook.shouldConsumeClick(screen, mx, my) ? EventResult.interruptFalse() : EventResult.pass());
 
         // Money bag tier predicate : empty / silver / gold / netherite skins.
         ItemProperties.register(

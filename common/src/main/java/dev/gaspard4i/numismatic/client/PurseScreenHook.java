@@ -24,14 +24,31 @@ public final class PurseScreenHook {
 
     private static final WeakHashMap<CreativeModeInventoryScreen, PurseInventoryWidget> CREATIVE_WIDGETS =
             new WeakHashMap<>();
+    private static final WeakHashMap<Screen, PurseInventoryWidget> ALL_WIDGETS =
+            new WeakHashMap<>();
 
     private PurseScreenHook() {}
+
+    /**
+     * Returns true when the given screen currently has an open purse popup whose area
+     * covers the mouse — callers should then drop the click and not forward it to the
+     * inventory slots behind.
+     */
+    public static boolean shouldConsumeClick(Screen screen, double mouseX, double mouseY) {
+        PurseInventoryWidget widget = ALL_WIDGETS.get(screen);
+        if (widget == null || !widget.visible) return false;
+        if (!widget.consumesClick(mouseX, mouseY)) return false;
+        widget.mouseClicked(mouseX, mouseY, 0);
+        return true;
+    }
 
     public static void attach(Screen screen, ScreenAccess access) {
         if (screen instanceof InventoryScreen inv) {
             int x = inv.leftPos + 160;
             int y = inv.topPos + 5;
-            access.addRenderableWidget(new PurseInventoryWidget(x, y));
+            PurseInventoryWidget widget = new PurseInventoryWidget(x, y);
+            ALL_WIDGETS.put(inv, widget);
+            access.addRenderableWidget(widget);
             return;
         }
         if (screen instanceof CreativeModeInventoryScreen creative) {
@@ -39,13 +56,16 @@ public final class PurseScreenHook {
             int y = creative.topPos + 4;
             PurseInventoryWidget widget = new PurseInventoryWidget(x, y);
             CREATIVE_WIDGETS.put(creative, widget);
+            ALL_WIDGETS.put(creative, widget);
             access.addRenderableWidget(widget);
             return;
         }
         if (screen instanceof MerchantScreen merchant) {
             int x = ((AbstractContainerScreen<?>) merchant).leftPos + 260;
             int y = ((AbstractContainerScreen<?>) merchant).topPos + 5;
-            access.addRenderableWidget(new PurseInventoryWidget(x, y));
+            PurseInventoryWidget widget = new PurseInventoryWidget(x, y);
+            ALL_WIDGETS.put(merchant, widget);
+            access.addRenderableWidget(widget);
         }
     }
 
