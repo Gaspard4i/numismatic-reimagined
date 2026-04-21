@@ -1,7 +1,7 @@
 {
   "display": {
     "icon": {
-      "item": "numismatic_reimagined:star_coin"
+      "id": "numismatic_reimagined:star_coin"
     },
     "title": {
       "translate": "advancement.numismatic_reimagined.star_coin.title"
@@ -16,11 +16,8 @@
     "hidden": false
   },
   "criteria": {
-    "accumulate_netherite": {
-      "trigger": "numismatic_reimagined:accumulate_netherite",
-      "conditions": {
-        "threshold": 1000000000
-      }
+    "placeholder": {
+      "trigger": "minecraft:impossible"
     }
   },
   "rewards": {

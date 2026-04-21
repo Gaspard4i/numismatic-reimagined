@@ -1,10 +1,10 @@
 {
   "textures": {
-    "base": "minecraft:block/stripped_oak_log",
-    "top": "minecraft:block/crafting_table_top",
-    "side": "minecraft:block/oak_planks",
+    "base": "numismatic_reimagined:block/request_board_side",
+    "top": "numismatic_reimagined:block/request_board_top",
+    "side": "numismatic_reimagined:block/request_board_side",
     "paper": "minecraft:block/paper",
-    "particle": "minecraft:block/oak_planks"
+    "particle": "numismatic_reimagined:block/request_board_side"
   },
   "elements": [
     {

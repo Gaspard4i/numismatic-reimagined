@@ -12,5 +12,8 @@ public final class NumismaticClient {
             if (!(screen instanceof InventoryScreen inventoryScreen)) return;
             PurseScreenHook.attach(inventoryScreen, access);
         });
+        // Tooltip component registration is platform-specific :
+        //  - fabric: NumismaticFabricClient.onInitializeClient → TooltipComponentCallback
+        //  - neoforge: NumismaticNeoForgeClient.onRegisterClientTooltipComponentFactories
     }
 }

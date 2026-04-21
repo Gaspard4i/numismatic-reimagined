@@ -1,5 +1,6 @@
 package dev.gaspard4i.numismatic.item;
 
+import dev.gaspard4i.numismatic.client.tooltip.CurrencyTooltipData;
 import dev.gaspard4i.numismatic.component.NumismaticDataComponents;
 import dev.gaspard4i.numismatic.currency.CurrencyFormatter;
 import dev.gaspard4i.numismatic.currency.PlayerCurrencyManager;
@@ -18,10 +19,12 @@ import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
+import java.util.Optional;
 
 public class MoneyBagItem extends Item {
 
@@ -113,14 +116,17 @@ public class MoneyBagItem extends Item {
     public void appendHoverText(ItemStack stack, TooltipContext context,
                                 List<Component> tooltip, TooltipFlag flag) {
         long value = getValue(stack);
-        if (value > 0) {
-            tooltip.add(Component.translatable(
-                            "tooltip.numismatic_reimagined.money_bag_value",
-                            CurrencyFormatter.format(value))
-                    .withStyle(ChatFormatting.GRAY));
-        } else {
+        if (value <= 0) {
             tooltip.add(Component.translatable("tooltip.numismatic_reimagined.money_bag.empty")
                     .withStyle(ChatFormatting.DARK_GRAY));
         }
+        // When value > 0, getTooltipImage returns the visual breakdown (coin icons + count).
+    }
+
+    @Override
+    public Optional<TooltipComponent> getTooltipImage(ItemStack stack) {
+        long value = getValue(stack);
+        if (value <= 0) return Optional.empty();
+        return Optional.of(CurrencyTooltipData.ofRawValue(value));
     }
 }
