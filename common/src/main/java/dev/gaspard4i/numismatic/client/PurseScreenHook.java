@@ -8,8 +8,10 @@ public final class PurseScreenHook {
     private PurseScreenHook() {}
 
     public static void attach(InventoryScreen screen, ScreenAccess access) {
-        int x = screen.leftPos + 152;
-        int y = screen.topPos + 6;
+        // Upstream positions the purse button at handled-screen-relative (160, 5),
+        // which places it just right of the crafting output slot on the survival inventory.
+        int x = screen.leftPos + 160;
+        int y = screen.topPos + 5;
         PurseInventoryWidget widget = new PurseInventoryWidget(x, y);
         access.addRenderableWidget(widget);
     }

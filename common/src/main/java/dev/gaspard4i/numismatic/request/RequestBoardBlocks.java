@@ -20,7 +20,8 @@ public final class RequestBoardBlocks {
 
     public static final RegistrySupplier<Block> REQUEST_BOARD = BLOCKS.register(
             "request_board",
-            () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PLANKS).strength(2.0f))
+            () -> new RequestBoardBlock(
+                    BlockBehaviour.Properties.ofFullCopy(Blocks.CHEST).strength(2.5f, 3.0f).noOcclusion())
     );
 
     static {
