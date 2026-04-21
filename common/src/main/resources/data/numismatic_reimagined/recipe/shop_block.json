@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "GGG",
+    "GXG",
+    "GGG"
+  ],
+  "key": {
+    "G": {
+      "item": "numismatic_reimagined:gold_coin"
+    },
+    "X": {
+      "item": "numismatic_reimagined:silver_shop"
+    }
+  },
+  "result": {
+    "count": 1,
+    "id": "numismatic_reimagined:shop_block"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "display": {
+    "icon": {
+      "item": "numismatic_reimagined:star_coin"
+    },
+    "title": {
+      "translate": "advancement.numismatic_reimagined.star_coin.title"
+    },
+    "description": {
+      "translate": "advancement.numismatic_reimagined.star_coin.description"
+    },
+    "frame": "challenge",
+    "background": "minecraft:textures/block/netherite_block.png",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "accumulate_netherite": {
+      "trigger": "numismatic_reimagined:accumulate_netherite",
+      "conditions": {
+        "threshold": 1000000000
+      }
+    }
+  },
+  "rewards": {
+    "function": "numismatic_reimagined:grant_star_coin"
+  }
+}

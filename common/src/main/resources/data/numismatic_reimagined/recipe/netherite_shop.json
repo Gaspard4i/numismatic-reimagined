@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "NNN",
+    "NXN",
+    "NNN"
+  ],
+  "key": {
+    "N": {
+      "item": "numismatic_reimagined:netherite_coin"
+    },
+    "X": {
+      "item": "numismatic_reimagined:shop_block"
+    }
+  },
+  "result": {
+    "count": 1,
+    "id": "numismatic_reimagined:netherite_shop"
+  }
+}

@@ -1,1 +1,7 @@
-{"parent":"block/cube_all","textures":{"all":"block/netherite_block"}}
+{
+  "parent": "numismatic_reimagined:block/shop_block",
+  "textures": {
+    "0": "numismatic_reimagined:block/netherite_shop_top",
+    "1": "numismatic_reimagined:block/netherite_shop_side"
+  }
+}

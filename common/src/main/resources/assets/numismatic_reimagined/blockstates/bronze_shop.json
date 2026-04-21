@@ -1,1 +1,5 @@
-{"variants":{"":{"model":"numismatic_reimagined:block/bronze_shop"}}}
+{
+  "variants": {
+    "": { "model": "numismatic_reimagined:block/bronze_shop" }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "PPP",
+    "GQG",
+    "PPP"
+  ],
+  "key": {
+    "P": {
+      "tag": "minecraft:planks"
+    },
+    "Q": {
+      "item": "minecraft:paper"
+    },
+    "G": {
+      "item": "numismatic_reimagined:gold_coin"
+    }
+  },
+  "result": {
+    "count": 1,
+    "id": "numismatic_reimagined:request_board"
+  }
+}

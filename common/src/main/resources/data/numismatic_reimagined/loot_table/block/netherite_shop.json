@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        { "type": "minecraft:item", "name": "numismatic_reimagined:netherite_shop" }
+      ]
+    }
+  ]
+}
