@@ -6,6 +6,7 @@
   "description": "A reimagined economy mod: custom currency, shops, piggy banks, and more.",
   "authors": ["Gaspard4i"],
   "license": "MIT",
+  "icon": "assets/numismatic_reimagined/icon.png",
   "environment": "*",
   "entrypoints": {
     "main": ["dev.gaspard4i.numismatic.fabric.NumismaticFabric"],

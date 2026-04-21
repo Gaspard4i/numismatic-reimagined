@@ -2,7 +2,9 @@ package dev.gaspard4i.numismatic.item;
 
 import dev.gaspard4i.numismatic.client.tooltip.CurrencyTooltipData;
 import dev.gaspard4i.numismatic.component.NumismaticDataComponents;
-import dev.gaspard4i.numismatic.currency.CurrencyFormatter;
+import dev.gaspard4i.numismatic.currency.CurrencyConverter;
+import dev.gaspard4i.numismatic.currency.CurrencyNotifications;
+import dev.gaspard4i.numismatic.currency.CurrencyResolver;
 import dev.gaspard4i.numismatic.currency.PlayerCurrencyManager;
 import dev.gaspard4i.numismatic.network.NumismaticNetworking;
 import net.minecraft.ChatFormatting;
@@ -60,6 +62,7 @@ public class MoneyBagItem extends Item {
                         SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.PLAYERS,
                         0.6f, 1.0f + level.getRandom().nextFloat() * 0.3f);
 
+                CurrencyNotifications.sendDeposit(serverPlayer, value);
                 NumismaticNetworking.syncBalance(serverPlayer,
                         manager.getBalance(serverPlayer.getUUID()));
             }
@@ -68,6 +71,10 @@ public class MoneyBagItem extends Item {
         return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
     }
 
+    /**
+     * Called when {@code thisStack} is on the cursor and the player clicks a slot holding {@code other}.
+     * LEFT click on coin/bag → merge into a bigger money bag placed in the slot.
+     */
     @Override
     public boolean overrideStackedOnOther(ItemStack thisStack, Slot slot, ClickAction action, Player player) {
         if (action != ClickAction.PRIMARY) return false;
@@ -85,9 +92,41 @@ public class MoneyBagItem extends Item {
         return true;
     }
 
+    /**
+     * Called when a money bag is in the slot and the player clicks it with {@code other} on the cursor.
+     * - RIGHT click + empty cursor → extract the highest denomination coin stack onto the cursor
+     * - LEFT click + coin or bag   → merge into a bigger money bag placed in the slot
+     */
     @Override
     public boolean overrideOtherStackedOnMe(ItemStack thisStack, ItemStack other, Slot slot,
                                              ClickAction action, Player player, SlotAccess access) {
+        // Extract coin from bag : right click with empty cursor.
+        if (action == ClickAction.SECONDARY && other.isEmpty()) {
+            long value = getValue(thisStack);
+            if (value <= 0) return false;
+            var stacks = CurrencyConverter.getAsValidStacks(value);
+            if (stacks.isEmpty()) return false;
+            ItemStack coinStack = stacks.get(0);
+            if (!(coinStack.getItem() instanceof CoinItem coin)) return false;
+
+            access.set(coinStack);
+
+            long[] values = CurrencyResolver.splitValues(value);
+            values[coin.getCurrency().ordinal()] -= coinStack.getCount();
+            long remaining = CurrencyResolver.combineValues(values);
+
+            if (remaining == 0) {
+                slot.set(ItemStack.EMPTY);
+            } else if (CurrencyResolver.canBeCompacted(values)
+                    && CurrencyConverter.getAsValidStacks(remaining).size() == 1) {
+                // Single-stack remainder : prefer showing it as a coin rather than a bag.
+                slot.set(CurrencyConverter.getAsValidStacks(remaining).get(0));
+            } else {
+                slot.set(createWithValue(this, remaining));
+            }
+            return true;
+        }
+
         if (action != ClickAction.PRIMARY) return false;
         if (other.isEmpty()) return false;
 

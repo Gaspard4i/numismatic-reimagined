@@ -2,6 +2,7 @@ package dev.gaspard4i.numismatic.item;
 
 import dev.gaspard4i.numismatic.currency.Currency;
 import dev.gaspard4i.numismatic.currency.CurrencyFormatter;
+import dev.gaspard4i.numismatic.currency.CurrencyNotifications;
 import dev.gaspard4i.numismatic.currency.PlayerCurrencyManager;
 import dev.gaspard4i.numismatic.network.NumismaticNetworking;
 import net.minecraft.ChatFormatting;
@@ -58,6 +59,7 @@ public class CoinItem extends Item {
                         SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.PLAYERS,
                         0.5f, 1.0f + level.getRandom().nextFloat() * 0.4f);
 
+                CurrencyNotifications.sendDeposit(serverPlayer, value);
                 NumismaticNetworking.syncBalance(serverPlayer,
                         manager.getBalance(serverPlayer.getUUID()));
             }

@@ -27,7 +27,9 @@ public final class NumismaticShops {
         for (ShopTier tier : ShopTier.values()) {
             RegistrySupplier<Block> block = BLOCKS.register(
                     tier.id(),
-                    () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.CHEST).strength(2.5f, 3.0f))
+                    () -> new ShopBlock(
+                            BlockBehaviour.Properties.ofFullCopy(Blocks.CHEST).strength(2.5f, 3.0f).noOcclusion(),
+                            tier)
             );
             SHOPS.put(tier, block);
             NumismaticItems.ITEMS.register(tier.id(), () -> new BlockItem(block.get(), new Item.Properties()));

@@ -64,7 +64,8 @@ val jacocoExclusions = listOf(
     "dev/gaspard4i/numismatic/config/**",
     "dev/gaspard4i/numismatic/mixin/**",
     "dev/gaspard4i/numismatic/currency/PlayerCurrencyManager*.class",
-    "dev/gaspard4i/numismatic/currency/CurrencyNotifications*.class"
+    "dev/gaspard4i/numismatic/currency/CurrencyNotifications*.class",
+    "dev/gaspard4i/numismatic/currency/CurrencyConverter*.class"
 )
 
 tasks.jacocoTestReport {

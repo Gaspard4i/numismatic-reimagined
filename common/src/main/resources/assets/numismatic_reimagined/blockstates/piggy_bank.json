@@ -1,5 +1,8 @@
 {
   "variants": {
-    "": { "model": "numismatic_reimagined:block/piggy_bank" }
+    "facing=north": { "model": "numismatic_reimagined:block/piggy_bank", "y": 0 },
+    "facing=east":  { "model": "numismatic_reimagined:block/piggy_bank", "y": 90 },
+    "facing=south": { "model": "numismatic_reimagined:block/piggy_bank", "y": 180 },
+    "facing=west":  { "model": "numismatic_reimagined:block/piggy_bank", "y": 270 }
   }
 }

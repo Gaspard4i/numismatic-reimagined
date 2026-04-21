@@ -7,6 +7,7 @@ issueTrackerURL = "https://github.com/Gaspard4i/numismatic-reimagined/issues"
 modId = "numismatic_reimagined"
 version = "${version}"
 displayName = "Numismatic Reimagined"
+logoFile = "assets/numismatic_reimagined/icon.png"
 authors = "Gaspard4i"
 description = '''
 A reimagined economy mod: custom currency, shops, piggy banks, and more.
